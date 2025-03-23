@@ -74,7 +74,9 @@
              BorderThickness="0" Grid.ColumnSpan="2"/>
                     <Button Content="📩" Margin="11,42,11,12" Foreground="White"
             Background="#549F" BorderThickness="0" Grid.Column="1"/>
+                </Grid>
+            </Border>
+            
         </Grid>
-
     </Grid>
 </Window>
