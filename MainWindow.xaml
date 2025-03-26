@@ -6,7 +6,7 @@
         Title="Lynx"
         Height="680" Width="1200"
         Background="#F8F8F8"
-        mc:Ignorable="d">
+        mc:Ignorable="d" WindowStartupLocation="CenterScreen">
     <Grid>
         <!-- Main Grid for Layout -->
         <Grid.ColumnDefinitions>
@@ -18,16 +18,12 @@
         </Grid.ColumnDefinitions>
 
         <!-- Left Sidebar (Funtions List) -->
-        <StackPanel Grid.Column="0" Background="#F8F8F8" Width="50">
-
-        </StackPanel>
+        <StackPanel Grid.Column="0" Background="#F8F8F8" Width="50"/>
 
         <Border Grid.Column="1" Background="#1E1E1E" Width="0.5"/>
 
         <!-- Middle Bar (Contacts List)-->
-        <Grid Grid.Column="2">
-
-        </Grid>
+        <Grid Grid.Column="2"/>
 
         <Border Grid.Column="3" Background="#1E1E1E" Width="0.5"/>
 
@@ -53,9 +49,7 @@
 
             <!-- Chat Messages -->
             <ScrollViewer Grid.Row="1" Background="#F8F8F8" VerticalScrollBarVisibility="Hidden">
-                <StackPanel>
-
-                </StackPanel>
+                <StackPanel/>
             </ScrollViewer>
 
             <!-- Input Area -->
@@ -70,13 +64,13 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="50"/>
                     </Grid.ColumnDefinitions>
-                    <TextBox Width="Auto" Margin="0,30,0,0" Background="#252525" Foreground="White"
-             BorderThickness="0" Grid.ColumnSpan="2"/>
+                    <TextBox Width="Auto" Margin="0,30,0,0" Background="LightGray" Foreground="White"
+             BorderThickness="0,0.5,0,0" Grid.ColumnSpan="2" BorderBrush="Black" TextChanged="TextBox_TextChanged" HorizontalAlignment="Stretch" FontSize="14" AcceptsTab="True" AcceptsReturn="True" TextWrapping="WrapWithOverflow"/>
                     <Button Content="📩" Margin="11,42,11,12" Foreground="White"
             Background="#549F" BorderThickness="0" Grid.Column="1"/>
                 </Grid>
             </Border>
-            
+
         </Grid>
     </Grid>
 </Window>
