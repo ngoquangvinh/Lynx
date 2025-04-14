@@ -2,10 +2,13 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net8.0-windows</TargetFramework>
+    <TargetFramework>net8.0-windows7.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
+    <EnableWindowsFormsHighDpiAutoResizing>true</EnableWindowsFormsHighDpiAutoResizing>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>Lynx-V2.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
@@ -15,6 +18,20 @@
     <None Remove="img1\Lynx_V2.png" />
     <None Remove="img1\secure.png" />
     <None Remove="img1\smart.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Remove="TitleBar.xaml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Lynx-V2.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Controls\TitleBar.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
   </ItemGroup>
 
   <ItemGroup>
