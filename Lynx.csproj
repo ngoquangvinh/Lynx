@@ -8,4 +8,35 @@
     <UseWPF>true</UseWPF>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Page Remove="Controls\TitleBar.xaml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Controls\TitleBar.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Models\" />
+    <Folder Include="ViewModels\" />
+    <Folder Include="Services\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Views\Img\123.png" />
+    <Resource Include="Views\Img\fen.png" />
+    <Resource Include="Views\Img\login.png" />
+    <Resource Include="Views\Img\Lynx_V2.png" />
+    <Resource Include="Views\Img\secure.png" />
+    <Resource Include="Views\Img\smart.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Controls\TitleBar.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
+
 </Project>
