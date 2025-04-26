@@ -28,7 +28,6 @@
     <Resource Include="Views\Img\123.png" />
     <Resource Include="Views\Img\fen.png" />
     <Resource Include="Views\Img\login.png" />
-    <Resource Include="Views\Img\Lynx_V2.png" />
     <Resource Include="Views\Img\secure.png" />
     <Resource Include="Views\Img\smart.png" />
   </ItemGroup>
