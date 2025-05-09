@@ -1,0 +1,124 @@
+﻿<UserControl x:Class="ChatUI.Custom_Controls.ChatList"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:ChatUI.Custom_Controls"
+             mc:Ignorable="d" Height="Auto" Width="Auto">
+    <UserControl.Resources>
+        <Style x:Key="ChatListBackgroundStyle" TargetType="{x:Type Border}">
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Focusable" Value="False"/>
+            <!-- Thêm viền cho Border -->
+            <Setter Property="BorderBrush" Value="#D3D3D3"/>
+            <!-- Màu viền xám -->
+            <Setter Property="BorderThickness" Value="1"/>
+            <!-- Độ dày viền -->
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}, Mode=FindAncestor}}" Value="True">
+                    <Setter Property="Background" Value="#E0E0E0"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}, Mode=FindAncestor}}" Value="True">
+                    <Setter Property="Background" Value="#ADD8E6"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+
+        <DropShadowEffect x:Key="DropShadow" BlurRadius="10" ShadowDepth="3" Direction="360" Color="#F54A4A"/>
+        <Style x:Key="ChatIndicatorStyle" TargetType="{x:Type Border}">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Height" Value="{Binding Height, RelativeSource={RelativeSource AncestorType={x:Type Border}, Mode=FindAncestor}}"/>
+            <Setter Property="Width" Value="4"/>
+            <Setter Property="Visibility" Value="Hidden"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="Focusable" Value="False"/>
+
+            <!--Shadow Effect-->
+            <Setter Property="Effect" Value="{StaticResource DropShadow}"/>
+
+            <!--Mouse Triggers to change background color and show/hide indicator-->
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}, Mode=FindAncestor}}" Value="True">
+                    <Setter Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}, Mode=FindAncestor}}" Value="True">
+                    <Setter Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style TargetType="{x:Type ListBoxItem}">
+            <Setter Property="SnapsToDevicePixels" Value="True"/>
+            <!-- Giảm chiều cao của ListBoxItem -->
+            <Setter Property="Height" Value="120"/>
+            <Setter Property="HorizontalContentAlignment" Value="{Binding HorizontalContentAlignment, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"/>
+            <Setter Property="VerticalContentAlignment" Value="{Binding VerticalContentAlignment, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Margin" Value="0"/>
+            <!-- Không có margin giữa các item -->
+
+            <Setter Property="IsSelected" Value="{Binding IsChatSelected}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ListBoxItem}">
+                        <Border x:Name="border" SnapsToDevicePixels="True" Style="{StaticResource ChatListBackgroundStyle}">
+                            <Grid>
+                                <!-- Indicator -->
+                                <Border x:Name="ChatIndicatorRight" CornerRadius="6,0,0,6" Style="{StaticResource ChatIndicatorStyle}"/>
+                                <!-- Nội dung Chat -->
+                                <StackPanel Orientation="Vertical">
+                                    <Grid Margin="20,20,20,12">
+                                        <!-- Giảm margin để giảm kích thước -->
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="*"/>
+                                            <RowDefinition Height="*"/>
+                                        </Grid.RowDefinitions>
+
+                                        <!-- Profile Pic và thông tin -->
+                                        <local:RoundProfileButton ProfileImageSource="{Binding ContactProfilePic}" IsOnline="{Binding IsOnline}"/>
+
+                                        <Grid Grid.Column="1" Margin="10,0,0,0">
+                                            <!-- Giảm margin -->
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+
+                                            <!-- Tên và Thời gian -->
+                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Top" Grid.Row="0">
+                                                <TextBlock Text="{Binding ContactName}" FontWeight="Bold" FontSize="16" Margin="0,0,5,0"/>
+                                                <TextBlock Text="{Binding LastMessageTime}" FontSize="14" HorizontalAlignment="Right" Foreground="#B7B5B8"/>
+                                            </StackPanel>
+
+                                            <!-- Tin nhắn cuối -->
+                                            <TextBlock Text="{Binding Message}" FontSize="13" VerticalAlignment="Center" Margin="0,5,0,5" Grid.Row="1"/>
+                                        </Grid>
+                                    </Grid>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+
+        <Style x:Key="ChatListBoxStyle" TargetType="{x:Type ListBox}">
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="VerticalAlignment" Value="Stretch"/>
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="Focusable" Value="False"/>
+        </Style>
+    </UserControl.Resources>
+
+    <ListBox Style="{StaticResource ChatListBoxStyle}" ItemsSource="{Binding ChatListItems}" SelectedItem="{Binding SelectedChat, Mode=TwoWay}"/>
+</UserControl>
