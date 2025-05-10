@@ -36,6 +36,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="6.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Resource Include="Views\Img\123.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>

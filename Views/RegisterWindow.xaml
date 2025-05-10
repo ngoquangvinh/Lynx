@@ -51,7 +51,7 @@
                     FontWeight="Bold"
                     BorderThickness="0"
                     Cursor="Hand"
-                    Click="Register_Click"/>
+                    Click="Register_Click1"/>
 
             <TextBlock Text="Already have an account? Login"
                        FontSize="12"

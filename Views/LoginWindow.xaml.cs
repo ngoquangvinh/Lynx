@@ -1,10 +1,15 @@
-﻿using System.Windows;
+﻿using System.Net.Mail;
+using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
+using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
+using System.Security.Cryptography;
 
+using System.Text;
 namespace Login1
 {
     public partial class MainWindow : Window
@@ -132,11 +137,44 @@ namespace Login1
 
         private void ForgotPassword_Click(object sender, MouseButtonEventArgs e)
         {
-            new ForgotPasswordWindow().Show();
+            this.Hide();  // Ẩn form đăng nhập
+            var forgotPasswordWindow = new ForgotPasswordWindow();
+            forgotPasswordWindow.Show();
+            forgotPasswordWindow.Closed += (s, args) => this.Show();
         }
+
+        // HAM PHAN DANG KI
+        private bool IsValidEmail(string email)
+        {
+            try
+            {
+                var addr = new MailAddress(email);
+                return addr.Address == email;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private bool IsValidPhone(string phone)
+        {
+            return ulong.TryParse(phone, out _) && phone.Length >= 10 && phone.Length <= 11;
+        }
+        private string HashPassword(string password)
+        {
+            using (SHA256 sha256 = SHA256.Create())
+            {
+                byte[] bytes = Encoding.UTF8.GetBytes(password);
+                byte[] hash = sha256.ComputeHash(bytes);
+                return Convert.ToBase64String(hash);
+            }
+        }
+
+
+        // PHAN DANG KI
         private void Register_Click(object sender, RoutedEventArgs e)
         {
-            // Lấy dữ liệu từ form
             string fullName = FullNameBox.Text.Trim();
             string username = UsernameBox.Text.Trim();
             string phone = PhoneBox.Text.Trim();
@@ -145,7 +183,6 @@ namespace Login1
             string confirmPassword = ConfirmPasswordBox.Password.Trim();
             DateTime? birthday = BirthdayPicker.SelectedDate;
 
-            // Kiểm tra dữ liệu nhập vào
             if (string.IsNullOrEmpty(fullName) ||
                 string.IsNullOrEmpty(username) ||
                 string.IsNullOrEmpty(phone) ||
@@ -158,14 +195,127 @@ namespace Login1
                 return;
             }
 
+            if (!IsValidPhone(phone))
+            {
+                MessageBox.Show("Invalid phone number. It must be numeric and 10–11 digits.");
+                return;
+            }
+
+            if (!IsValidEmail(email))
+            {
+                MessageBox.Show("Invalid email format.");
+                return;
+            }
+
             if (password != confirmPassword)
             {
                 MessageBox.Show("Passwords do not match!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
-            MessageBox.Show("Account created successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
-            BackToLogin_MouseDown(null, null);
+
+            string hashedPassword = HashPassword(password);
+
+            string connectionString = "Server=TRUNGPC;Database=UserProfileDB;Trusted_Connection=True;TrustServerCertificate=True;"; // sửa lại cho đúng
+
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    conn.Open();
+
+                    // Check if username already exists
+                    string checkQuery = "SELECT COUNT(*) FROM Users WHERE Username = @Username";
+                    using (SqlCommand checkCmd = new SqlCommand(checkQuery, conn))
+                    {
+                        checkCmd.Parameters.AddWithValue("@Username", username);
+                        int exists = (int)checkCmd.ExecuteScalar();
+                        if (exists > 0)
+                        {
+                            MessageBox.Show("Username already exists. Please choose another one.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                            return;
+                        }
+                    }
+
+                    // Insert user into database
+                    string insertQuery = @"INSERT INTO User1s (FullName, Username, Phone, Email, Password, Birthday)
+                                   VALUES (@FullName, @Username, @Phone, @Email, @Password, @Birthday)";
+                    using (SqlCommand cmd = new SqlCommand(insertQuery, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@FullName", fullName);
+                        cmd.Parameters.AddWithValue("@Username", username);
+                        cmd.Parameters.AddWithValue("@Phone", phone);
+                        cmd.Parameters.AddWithValue("@Email", email);
+                        cmd.Parameters.AddWithValue("@Password", hashedPassword);
+                        cmd.Parameters.AddWithValue("@Birthday", birthday.Value);
+
+                        int rows = cmd.ExecuteNonQuery();
+                        if (rows > 0)
+                        {
+                            MessageBox.Show("✅ Account created successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                            BackToLogin_MouseDown(null, null);
+                        }
+                        else
+                        {
+                            MessageBox.Show("❌ Registration failed!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("❌ Error: " + ex.Message, "Database Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
+
+        // PHAN DANG NHAP
+        private void SignInButton_Click(object sender, RoutedEventArgs e)
+        {
+            string email = EmailBox_Login.Text.Trim();   // ✅ sửa lại tên biến ở đây
+            string password = PasswordBox_Login.Password.Trim();
+
+            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
+            {
+                MessageBox.Show("Please enter both email and password.", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            string hashedPassword = HashPassword(password);
+
+            string connectionString = "Server=TRUNGPC;Database=UserProfileDB;Trusted_Connection=True;TrustServerCertificate=True;";
+
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    conn.Open();
+                    string query = "SELECT COUNT(*) FROM User1s WHERE Email = @Email AND Password = @Password";
+                    using (SqlCommand cmd = new SqlCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@Email", email); // ✅ đúng biến
+                        cmd.Parameters.AddWithValue("@Password", hashedPassword);
+
+                        int match = (int)cmd.ExecuteScalar();
+                        if (match > 0)
+                        {
+                            MessageBox.Show("✅ Login successful!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                            // TODO: chuyển sang dashboard hoặc trang chính
+                        }
+                        else
+                        {
+                            MessageBox.Show("❌ Invalid email or password.", "Login Failed", MessageBoxButton.OK, MessageBoxImage.Error);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("❌ Error: " + ex.Message, "Database Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+
+
+
 
 
         private readonly Duration animationDuration = new Duration(TimeSpan.FromMilliseconds(450));
@@ -226,7 +376,5 @@ namespace Login1
                 RegisterForm.Visibility = Visibility.Collapsed;
             };
         }
-
-
     }
 }

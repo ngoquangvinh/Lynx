@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
+
 namespace Login1
 {
     public partial class ForgotPasswordWindow : Window
@@ -33,5 +34,11 @@ namespace Login1
 
             StatusText.Text = $"Reset link sent to {email} (simulated).";
         }
+        private void BackToLoginButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.Close();
+        }
+
     }
+
 }
