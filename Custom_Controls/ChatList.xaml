@@ -1,0 +1,217 @@
+﻿<UserControl x:Class="LynxUI_Main.Custom_Controls.ChatList"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:converters="clr-namespace:LynxUI_Main.Converters"
+             xmlns:controls="clr-namespace:LynxUI_Main.Custom_Controls"
+             xmlns:vm="clr-namespace:LynxUI_Main.ViewModels">
+
+    <UserControl.Resources>
+        <converters:BoolToBrushConverter x:Key="BoolToBrushConverter" OnlineBrush="LimeGreen" OfflineBrush="Gray" />
+        <converters:TimeAgoConverter x:Key="TimeAgoConverter"/>
+        <converters:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
+        <converters:NotStringToVisibilityConverter x:Key="NotStringToVisibilityConverter"/>
+        <converters:IndexToOffsetConverter x:Key="IndexToOffsetConverter"/>
+        <converters:GroupAvatarPositionConverter x:Key="GroupAvatarPositionConverter" />
+        <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+        <converters:InvertedBoolToVisibilityConverter x:Key="InvertedBoolToVisibilityConverter" />
+        <converters:SafeImagePathConverter x:Key="SafeImagePathConverter"/>
+
+        <Style x:Key="ChatListBoxStyle" TargetType="{x:Type ListBox}">
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="VerticalAlignment" Value="Stretch"/>
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="Focusable" Value="False"/>
+        </Style>
+
+        <Style TargetType="ListBoxItem">
+            <Setter Property="SnapsToDevicePixels" Value="True"/>
+            <Setter Property="Height" Value="90"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Margin" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <Border x:Name="border"
+                                CornerRadius="6"
+                                Background="Transparent"
+                                BorderBrush="#D3D3D3"
+                                BorderThickness="1"
+                                SnapsToDevicePixels="True">
+                            <ContentPresenter Margin="5" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#E0E0E0"/>
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#ADD8E6"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="740" />
+        </Grid.RowDefinitions>
+
+        <!-- Search UI -->
+
+        <Grid Grid.Row="0" Margin="10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Search bar with icon -->
+            <Border Background="#F1F3F6"
+                    CornerRadius="6"
+                    Padding="6"
+                    BorderBrush="#DDD"
+                    BorderThickness="1"
+                    VerticalAlignment="Center">
+                <DockPanel LastChildFill="True" VerticalAlignment="Center">
+                    <Image Source="/Assets/icon_search.png"
+                           Width="18" Height="18"
+                           Margin="0,0,6,0"
+                           VerticalAlignment="Center"
+                           DockPanel.Dock="Left"
+                           RenderOptions.BitmapScalingMode="HighQuality"/>
+                    <TextBox x:Name="SearchBox"
+                             BorderThickness="0"
+                             Background="Transparent"
+                             VerticalContentAlignment="Center"
+                             Text="{Binding SearchTerm, UpdateSourceTrigger=PropertyChanged}"
+                             FontSize="14"
+                             Foreground="#2C3E50"/>
+                </DockPanel>
+            </Border>
+
+            <!-- Action buttons -->
+            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="10,0,0,0">
+                <Button Width="32" Height="32" Background="Transparent" BorderBrush="Transparent"
+                ToolTip="Thêm bạn" Command="{Binding AddFriendCommand}">
+                    <Image Source="/Assets/AddFriend.png" Width="20" Height="20" RenderOptions.BitmapScalingMode="HighQuality"/>
+                </Button>
+                <Button Width="32" Height="32" Background="Transparent" BorderBrush="Transparent"
+                ToolTip="Tạo nhóm" Command="{Binding CreateGroupCommand}" Margin="5,0,0,0">
+                    <Image Source="/Assets/AddGroup.png" Width="20" Height="20" RenderOptions.BitmapScalingMode="HighQuality"/>
+                </Button>
+            </StackPanel>
+        </Grid>
+
+        <!-- Separator line -->
+        <Border Grid.Row="1" Height="1" Background="#DDD" Margin="10,0,10,5" />
+
+            <ListBox x:Name="ChatListBox" Grid.Row="2"
+                     Style="{StaticResource ChatListBoxStyle}"
+                     ItemsSource="{Binding Chats}"
+                     SelectedItem="{Binding SelectedChat, Mode=TwoWay}"
+                     ScrollViewer.VerticalScrollBarVisibility="Hidden"
+                     ScrollViewer.CanContentScroll="True"
+                     ScrollViewer.IsDeferredScrollingEnabled="False"
+                     ScrollViewer.PanningMode="VerticalOnly"
+                     PreviewMouseWheel="ChatListBox_PreviewMouseWheel"
+                     Background="Transparent">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Margin="10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Group Avatar -->
+                            <Grid Width="48" Height="48"
+                              Visibility="{Binding IsGroup, Converter={StaticResource BoolToVisibilityConverter}}">
+                                <ItemsControl ItemsSource="{Binding AvatarSlots}" AlternationCount="10">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <Canvas Width="48" Height="48" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Image Width="30" Height="30"
+                                               Source="{Binding Converter={StaticResource SafeImagePathConverter}}"
+                                               Stretch="UniformToFill" ClipToBounds="True">
+                                                <Image.Clip>
+                                                    <EllipseGeometry Center="15,15" RadiusX="15" RadiusY="15" />
+                                                </Image.Clip>
+                                            </Image>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                    <ItemsControl.ItemContainerStyle>
+                                        <Style TargetType="ContentPresenter">
+                                            <Setter Property="Canvas.Left">
+                                                <Setter.Value>
+                                                    <MultiBinding Converter="{StaticResource GroupAvatarPositionConverter}" ConverterParameter="Left">
+                                                        <Binding RelativeSource="{RelativeSource Self}" Path="(ItemsControl.AlternationIndex)"/>
+                                                        <Binding Path="DataContext.AvatarSlots.Count" RelativeSource="{RelativeSource AncestorType=ListBoxItem}" />
+                                                    </MultiBinding>
+                                                </Setter.Value>
+                                            </Setter>
+                                            <Setter Property="Canvas.Top">
+                                                <Setter.Value>
+                                                    <MultiBinding Converter="{StaticResource GroupAvatarPositionConverter}" ConverterParameter="Top">
+                                                        <Binding RelativeSource="{RelativeSource Self}" Path="(ItemsControl.AlternationIndex)"/>
+                                                        <Binding Path="DataContext.AvatarSlots.Count" RelativeSource="{RelativeSource AncestorType=ListBoxItem}" />
+                                                    </MultiBinding>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </Style>
+                                    </ItemsControl.ItemContainerStyle>
+                                </ItemsControl>
+                            </Grid>
+
+                            <!-- Personal Avatar -->
+                            <controls:RoundProfileButton Grid.Column="0" Width="40" Height="40"
+                            Visibility="{Binding IsGroup, Converter={StaticResource InvertedBoolToVisibilityConverter}}"
+                            ProfileImageSource="{Binding AvatarImageSource, FallbackValue='/Assets/avatar_default.png'}"
+                            IsOnline="{Binding IsOnline}" />
+
+                            <!-- Name + Message -->
+                            <StackPanel Grid.Column="1" Margin="10,0,0,0">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0"
+                                           Text="{Binding DisplayName}"
+                                           FontWeight="Bold"
+                                           FontSize="16"
+                                           MaxWidth="200"
+                                           TextTrimming="CharacterEllipsis"
+                                           VerticalAlignment="Top"
+                                           HorizontalAlignment="Left"/>
+                                    <TextBlock Grid.Column="1"
+                                           Text="{Binding LastMessageTime, Converter={StaticResource TimeAgoConverter}}"
+                                           FontSize="14"
+                                           Foreground="#B7B5B8"
+                                           Margin="10,0,0,0"
+                                           VerticalAlignment="Top"
+                                           HorizontalAlignment="Right"/>
+                                </Grid>
+                                <TextBlock Text="{Binding FormattedLastMessage}"
+                                       FontSize="13"
+                                       Foreground="Gray"
+                                       TextTrimming="CharacterEllipsis"
+                                       TextWrapping="NoWrap"
+                                       MaxWidth="200"
+                                       Margin="0,5,0,0"
+                                       HorizontalAlignment="Left" />
+                            </StackPanel>
+                        </Grid>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+    </Grid>
+</UserControl>

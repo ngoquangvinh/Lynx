@@ -1,0 +1,202 @@
+﻿<UserControl x:Class="LynxUI_Main.Custom_Controls.Conversation"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:models="clr-namespace:LynxUI_Main.Models"
+             xmlns:converters="clr-namespace:LynxUI_Main.Converters">
+
+    <UserControl.Resources>
+        <converters:MessageStatusToAlignmentConverter x:Key="MessageStatusToAlignmentConverter"/>
+        <converters:MessageStatusToBackgroundConverter x:Key="MessageStatusToBackgroundConverter"/>
+        <converters:SafeImagePathConverter x:Key="SafeImagePathConverter"/>
+        <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+        <converters:InvertedBoolToVisibilityConverter x:Key="InvertedBoolToVisibilityConverter"/>
+        <converters:BoolToAlignmentConverter x:Key="BoolToAlignmentConverter"/>
+        <converters:MessageBubbleColorConverter x:Key="MessageBubbleColorConverter"/>
+        <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
+
+        <DataTemplate x:Key="MessageTemplate" DataType="{x:Type models:MessageItem}">
+            <Grid Margin="10">
+                <Grid.ColumnDefinitions>
+                    <!-- Cột 1: Avatar người nhận -->
+                    <ColumnDefinition Width="Auto"/>
+                    <!-- Cột 2: Tin nhắn và avatar người gửi -->
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                
+                <Grid Grid.Column="1" Margin="10" HorizontalAlignment="{Binding IsOwnMessage, Converter={StaticResource BoolToAlignmentConverter}}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <!-- Avatar trái -->
+                    <Image Grid.Row="0" Grid.Column="0" Source="{Binding AvatarImageSource}"
+                           Width="36" Height="36" Margin="0,5,5,5" HorizontalAlignment="Left"
+                           Visibility="{Binding IsOwnMessage, Converter={StaticResource InvertedBoolToVisibilityConverter}}"
+                           ClipToBounds="True">
+                        <Image.Clip>
+                            <EllipseGeometry Center="18,18" RadiusX="18" RadiusY="18"/>
+                        </Image.Clip>
+                    </Image>
+                    
+                    <Border Grid.Row="0" Grid.Column="1" Padding="10" Margin="0,5,0,5"
+                            Background="{Binding IsOwnMessage, Converter={StaticResource MessageBubbleColorConverter}}"
+                            CornerRadius="12" MaxWidth="360"
+                            HorizontalAlignment="{Binding IsOwnMessage, Converter={StaticResource BoolToAlignmentConverter}}"
+                            SnapsToDevicePixels="True">
+                        <Grid>
+                            <StackPanel>
+
+                                <!-- TEXT -->
+                                <TextBlock Text="{Binding Message}"
+                                           FontSize="14"
+                                           TextWrapping="Wrap"
+                                           VerticalAlignment="Center"
+                                           TextAlignment="Left"
+                                           LineStackingStrategy="BlockLineHeight"
+                                           LineHeight="18"
+                                           Visibility="{Binding IsTextMessage, Converter={StaticResource BoolToVisibilityConverter}}"/>
+
+                                <!-- IMAGE -->
+                                <Grid Visibility="{Binding IsPicture, Converter={StaticResource BoolToVisibilityConverter}}">
+                                    <TextBlock Text="{Binding Message}" Foreground="Red"
+                                   FontWeight="Bold" FontSize="14"
+                                   Visibility="{Binding IsCorrupted, Converter={StaticResource BoolToVisibilityConverter}}"
+                                   HorizontalAlignment="Center"/>
+                                    <Viewbox MaxWidth="300" Margin="0,5">
+                                        <Image Source="{Binding ImageSource, Converter={StaticResource SafeImagePathConverter}}"
+                                   Stretch="Uniform"
+                                   Visibility="{Binding IsCorrupted, Converter={StaticResource InvertedBoolToVisibilityConverter}}"/>
+                                    </Viewbox>
+                                </Grid>
+
+                                <!-- VIDEO -->
+                                <Grid Visibility="{Binding IsVideo, Converter={StaticResource BoolToVisibilityConverter}}">
+                                    <TextBlock Text="{Binding Message}" Foreground="Red"
+                                   FontWeight="Bold" FontSize="14"
+                                   Visibility="{Binding IsCorrupted, Converter={StaticResource BoolToVisibilityConverter}}"
+                                   HorizontalAlignment="Center"/>
+                                    <MediaElement Source="{Binding VideoSource}" Width="250" Height="160"
+                                      LoadedBehavior="Manual"
+                                      Visibility="{Binding IsCorrupted, Converter={StaticResource InvertedBoolToVisibilityConverter}}"/>
+                                </Grid>
+
+                                <!-- AUDIO -->
+                                <StackPanel Orientation="Horizontal" Margin="0,5"
+                                Visibility="{Binding IsAudio, Converter={StaticResource BoolToVisibilityConverter}}">
+                                    <MediaElement Source="{Binding AudioSource}" LoadedBehavior="Manual"
+                                      Height="40" Width="200"/>
+                                    <Button Command="{Binding DownloadAudioCommand}" Content="💾" Margin="5,0"/>
+                                </StackPanel>
+
+                                <!-- FILE -->
+                                <Grid Visibility="{Binding IsFile, Converter={StaticResource BoolToVisibilityConverter}}">
+                                    <StackPanel Orientation="Horizontal" Margin="0,5"
+                                    Visibility="{Binding IsCorrupted, Converter={StaticResource InvertedBoolToVisibilityConverter}}">
+                                        <TextBlock Text="{Binding FileName}" FontWeight="Bold" FontSize="14"/>
+                                        <TextBlock Text=" - " FontSize="14"/>
+                                        <TextBlock Text="{Binding FileSize}" FontSize="14" Foreground="Gray"/>
+                                        <Button Command="{Binding DownloadFileCommand}" Content="💾" Margin="5,0"/>
+                                    </StackPanel>
+                                    <TextBlock Text="{Binding Message}" Foreground="Red"
+                                   FontSize="14" FontWeight="Bold"
+                                   Visibility="{Binding IsCorrupted, Converter={StaticResource BoolToVisibilityConverter}}"
+                                   HorizontalAlignment="Center"/>
+                                </Grid>
+
+                                <!-- STICKER -->
+                                <Image Source="{Binding StickerSource}" Width="100" Height="100" Margin="0,5"
+                           Visibility="{Binding IsSticker, Converter={StaticResource BoolToVisibilityConverter}}"/>
+
+                                <!-- EMOJI -->
+                                <TextBlock Text="{Binding Emoji}" FontSize="32" Margin="0,5"
+                               Visibility="{Binding IsEmoji, Converter={StaticResource BoolToVisibilityConverter}}"
+                               HorizontalAlignment="Center"/>
+                            </StackPanel>
+
+                        </Grid>
+                    </Border>
+                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding TimeStamp}" FontSize="10" Foreground="Gray"
+                               Margin="5,2,0,0" HorizontalAlignment="Right"/>
+                </Grid>
+            </Grid>
+        </DataTemplate>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="80"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="100"/>
+        </Grid.RowDefinitions>
+
+        <!-- Row 0: HEADER -->
+        <Border Grid.Row="0" Background="Transparent" BorderThickness="0,0,0,1" BorderBrush="LightGray">
+            <DockPanel Margin="10,5" Visibility="{Binding SelectedChat, Converter={StaticResource NullToVisibilityConverter}}">
+                <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
+                    <Ellipse Width="42" Height="42">
+                        <Ellipse.Fill>
+                            <ImageBrush ImageSource="{Binding SelectedChat.AvatarUrls[0]}" />
+                        </Ellipse.Fill>
+                    </Ellipse>
+                    <TextBlock Text="{Binding SelectedChat.DisplayName}" FontWeight="Bold" FontSize="16"
+                               VerticalAlignment="Center" Margin="10,0,0,0"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" DockPanel.Dock="Right" HorizontalAlignment="Right"
+                            VerticalAlignment="Center" Margin="0,0,10,0">
+                    <Button Width="32" Height="32" Margin="5" ToolTip="Gọi video" Background="Transparent" BorderBrush="Transparent">
+                        <Image Source="/Assets/call_icon_1.png" RenderOptions.BitmapScalingMode="HighQuality"/>
+                    </Button>
+                    <Button Width="32" Height="32" Margin="5" ToolTip="Tìm kiếm" Background="Transparent" BorderBrush="Transparent">
+                        <Image Source="/Assets/icon_search.png" RenderOptions.BitmapScalingMode="HighQuality"/>
+                    </Button>
+                    <Button Width="32" Height="32" Margin="5" ToolTip="Mở rộng" Background="Transparent" BorderBrush="Transparent"
+                            Click="BtnToggleSidebar_Click">
+                        <Image Source="/Assets/panel_toggle_icon.png" RenderOptions.BitmapScalingMode="HighQuality"/>
+                    </Button>
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
+        <!-- Row 1: Conversation Messages -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <ItemsControl ItemsSource="{Binding Messages}" ItemTemplate="{StaticResource MessageTemplate}" />
+        </ScrollViewer>
+
+        <!-- Row 2: TOOLBAR + TEXTBOX GỬI TIN -->
+        <Grid Grid.Row="2" Background="White" Margin="10,0,10,10"
+              Visibility="{Binding SelectedChat, Converter={StaticResource NullToVisibilityConverter}}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="40"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="5">
+                <Button Width="25" Height="25" Margin="5" Background="Transparent" BorderBrush="Transparent">
+                    <Image Source="/Assets/image_icon_1.png" RenderOptions.BitmapScalingMode="HighQuality"/>
+                </Button>
+                <Button Width="25" Height="25" Margin="5" Background="Transparent" BorderBrush="Transparent">
+                    <Image Source="/Assets/attachment.png" RenderOptions.BitmapScalingMode="HighQuality"/>
+                </Button>
+            </StackPanel>
+            
+            <!-- TextBox Chat -->
+            <Grid Grid.Row="1" Margin="5,0,5,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBox Grid.Column="0" Text="{Binding NewMessageText, UpdateSourceTrigger=PropertyChanged}" 
+                         FontSize="14" Padding="10" AcceptsReturn="True" TextWrapping="Wrap" PreviewKeyDown="TextBox_PreviewKeyDown"
+                         VerticalScrollBarVisibility="Auto" Height="45" VerticalAlignment="Center" HorizontalAlignment="Stretch" />
+                <Button Grid.Column="1" Width="45" Content="📩" Background="Transparent" BorderBrush="Transparent"
+                        RenderOptions.BitmapScalingMode="HighQuality" Command="{Binding SendCommand}" Margin="5,0,0,0"/>
+            </Grid>
+        </Grid>
+    </Grid>
+    
+    
+</UserControl>

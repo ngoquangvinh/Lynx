@@ -1,11 +1,182 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <OutputType>WinExe</OutputType>
-    <TargetFramework>net8.0-windows</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <UseWPF>true</UseWPF>
-  </PropertyGroup>
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net8.0-windows</TargetFramework>
+		<RootNamespace>LynxUI_Main</RootNamespace>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<UseWPF>true</UseWPF>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <Compile Remove="Converters\Converters.xaml.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Remove="Assets\77.jpg" />
+	  <None Remove="Assets\AddFriend.png" />
+	  <None Remove="Assets\AddGroup.png" />
+	  <None Remove="Assets\alderaan_by_kareguya_dh56ycn.jpg" />
+	  <None Remove="Assets\alone-pyramid-digital-art-4k-wallpaper.jpg" />
+	  <None Remove="Assets\avatar_default.png" />
+	  <None Remove="Assets\aw_alienfx_head_2560x1440_qhd_screenfill_2021.jpeg" />
+	  <None Remove="Assets\aw_hexagons_pink_head_1920x1080_hd_screenfill_2021.jpeg" />
+	  <None Remove="Assets\aw_yellow_stadium_light_head_9x16_screenfill_2021.jpeg" />
+	  <None Remove="Assets\call_icon.png" />
+	  <None Remove="Assets\call_icon_1.png" />
+	  <None Remove="Assets\Doggie Corgi.mp4" />
+	  <None Remove="Assets\Heavy explosion. - Xenolith3D.png" />
+	  <None Remove="Assets\Hello.txt" />
+	  <None Remove="Assets\icon_search.png" />
+	  <None Remove="Assets\image_icon.png" />
+	  <None Remove="Assets\image_icon_1.png" />
+	  <None Remove="Assets\panel_toggle_icon.png" />
+	  <None Remove="Assets\Screenshot_52.png" />
+	  <None Remove="Assets\Sheikah%283%29.jpg" />
+	  <None Remove="Assets\wallpaperflare.com_wallpaper.jpg" />
+	  <None Remove="Assets\_242_by_simpli58_dh4rdp4-414w-2x.jpg" />
+	  <None Remove="Assets\_6b491681-765f-48e3-9f73-c5eb552ecb31.jpg" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Page Remove="Converters\Converters.xaml" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Content Include="Assets\77.jpg">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Assets\aw_alienfx_head_2560x1440_qhd_screenfill_2021.jpeg">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Assets\aw_hexagons_pink_head_1920x1080_hd_screenfill_2021.jpeg">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Resource Include="Assets\call_icon.png">
+	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+	  </Resource>
+	  <Resource Include="Assets\call_icon_1.png">
+	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+	  </Resource>
+	  <Content Include="Assets\Hello.txt">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Assets\Sheikah(3).jpg">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Assets\wallpaperflare.com_wallpaper.jpg">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Resource Include="Assets\AddFriend.png" />
+	  <Resource Include="Assets\AddGroup.png">
+	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+	  </Resource>
+	  <Content Include="Assets\alderaan_by_kareguya_dh56ycn.jpg">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Assets\alone-pyramid-digital-art-4k-wallpaper.jpg">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Assets\avatar_default.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Assets\aw_yellow_stadium_light_head_9x16_screenfill_2021.jpeg">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Assets\Doggie Corgi.mp4">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Assets\Heavy explosion. - Xenolith3D.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Assets\Screenshot_52.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Assets\_242_by_simpli58_dh4rdp4-414w-2x.jpg">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Assets\_6b491681-765f-48e3-9f73-c5eb552ecb31.jpg">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	</ItemGroup>
+
+	<!-- Các file Resource -->
+	<ItemGroup>
+		<Resource Include="Assets\attachment.png" />
+		<Resource Include="Assets\badge.png" />
+		<Resource Include="Assets\close.png" />
+		<Resource Include="Assets\facebook.png" />
+		<Resource Include="Assets\happy.png" />
+		<Resource Include="Assets\icon_search.png" />
+		<Resource Include="Assets\image.png" />
+		<Content Include="Assets\image1.jpg">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Include="Assets\image2.jpg">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Include="Assets\image3.jpg">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Resource Include="Assets\image_icon.png">
+		  <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+		</Resource>
+		<Resource Include="Assets\image_icon_1.png">
+		  <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+		</Resource>
+		<Resource Include="Assets\insta.png" />
+		<Resource Include="Assets\LogoGrayBack.png" />
+		<Resource Include="Assets\LogoWhiteBack.png" />
+		<Resource Include="Assets\mic.png" />
+		<Resource Include="Assets\more.png" />
+		<Resource Include="Assets\muscle.png" />
+		<Resource Include="Assets\noimage.png" />
+		<Resource Include="Assets\ok.png" />
+		<Resource Include="Assets\one.png" />
+		<Resource Include="Assets\panel_toggle_icon.png">
+		  <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+		</Resource>
+		<Resource Include="Assets\phone.png" />
+		<Resource Include="Assets\play.png" />
+		<Resource Include="Assets\plus.png" />
+		<Resource Include="Assets\pray.png" />
+		<Content Include="Assets\profile1.jpg">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Resource Include="Assets\right.png">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Resource>
+		<Resource Include="Assets\search.png" />
+		<Resource Include="Assets\send.png" />
+		<Resource Include="Assets\smile.png" />
+		<Resource Include="Assets\twitter.png" />
+		<Resource Include="Assets\uit.png" />
+		<Resource Include="Assets\videocall.png" />
+		<Resource Include="Assets\wink.png" />
+	</ItemGroup>
+
+	<!-- Các file code-behind cần thêm -->
+	<ItemGroup>
+		<Compile Update="App.xaml.cs">
+			<SubType>Code</SubType>
+		</Compile>
+		<Compile Update="MainWindow.xaml.cs">
+			<SubType>Code</SubType>
+		</Compile>
+
+		<Compile Update="Custom_Controls\RoundProfileButton.xaml.cs">
+			<SubType>Code</SubType>
+		</Compile>
+		<Compile Update="Custom_Controls\MenuListControl.xaml.cs">
+			<SubType>Code</SubType>
+		</Compile>
+		<Compile Update="Custom_Controls\ChatList.xaml.cs">
+			<SubType>Code</SubType>
+		</Compile>
+		<Compile Update="Custom_Controls\Conversation.xaml.cs">
+			<SubType>Code</SubType>
+		</Compile>
+	</ItemGroup>
 
 </Project>
