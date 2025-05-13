@@ -1,0 +1,76 @@
+﻿<Window x:Class="Lynx.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        Title="Lynx"
+        Height="680" Width="1200"
+        Background="#F8F8F8"
+        mc:Ignorable="d" WindowStartupLocation="CenterScreen">
+    <Grid>
+        <!-- Main Grid for Layout -->
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition x:Name="Funtions" Width="60"/>
+            <ColumnDefinition Width="1"/>
+            <ColumnDefinition x:Name="Contacts" Width="300"/>
+            <ColumnDefinition Width="1"/>
+            <ColumnDefinition x:Name="Chat" Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Left Sidebar (Funtions List) -->
+        <StackPanel Grid.Column="0" Background="#F8F8F8" Width="50"/>
+
+        <Border Grid.Column="1" Background="#1E1E1E" Width="0.5"/>
+
+        <!-- Middle Bar (Contacts List)-->
+        <Grid Grid.Column="2"/>
+
+        <Border Grid.Column="3" Background="#1E1E1E" Width="0.5"/>
+
+
+        <!-- Right Side (Chat Window) -->
+        <Grid Grid.Column="4">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="60"/>
+            </Grid.RowDefinitions>
+
+            <!-- Chat Header -->
+            <Border Background="#F8F8F8" BorderThickness="0,0,0,0.5" Height="50">
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Setter Property="BorderBrush" Value="#1E1E1E"/>
+                    </Style>
+                </Border.Style>
+                <TextBlock Text="" Foreground="White" FontSize="18" FontWeight="Bold"
+                           VerticalAlignment="Center" Margin="10"/>
+            </Border>
+
+            <!-- Chat Messages -->
+            <ScrollViewer Grid.Row="1" Background="#F8F8F8" VerticalScrollBarVisibility="Hidden">
+                <StackPanel/>
+            </ScrollViewer>
+
+            <!-- Input Area -->
+            <Border Grid.Row="2" Background="#1E1E1E" Height="80" BorderThickness="0,0.5,0,0" Margin="0,-20,0,0">
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Setter Property="BorderBrush" Value="#1E1E1E"/>
+                    </Style>
+                </Border.Style>
+                <Grid Grid.Row="1" Background="#F8F8F8" Height="80"  >
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="50"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBox Width="Auto" Margin="0,30,0,0" Background="LightGray" Foreground="White"
+             BorderThickness="0,0.5,0,0" Grid.ColumnSpan="2" BorderBrush="Black" TextChanged="TextBox_TextChanged" HorizontalAlignment="Stretch" FontSize="14" AcceptsTab="True" AcceptsReturn="True" TextWrapping="WrapWithOverflow"/>
+                    <Button Content="📩" Margin="11,42,11,12" Foreground="White"
+            Background="#549F" BorderThickness="0" Grid.Column="1"/>
+                </Grid>
+            </Border>
+
+        </Grid>
+    </Grid>
+</Window>
