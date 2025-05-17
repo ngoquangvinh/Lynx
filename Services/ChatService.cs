@@ -53,7 +53,7 @@ namespace LynxUI_Main.Services
                 },
                 [5] = new List<MessageItem>
                 {
-                    new MessageItem { SenderId = 6, SenderName = "Đức", Message = "Họp chiều mai nha cả nhà.", MessageStatus = "Received", TimeStamp = "09:45", CurrentUserId = currentUserId, AvatarUrl = "Assets/77.jpg" },
+                    new MessageItem { SenderId = 6, SenderName = "Đức", Message = "Họp chiều mai nha cả nhà. Và tuần sau chúng ta chạy overnight không nghỉ để hoàn thành đồ án cho kịp tiến độ.", MessageStatus = "Received", TimeStamp = "09:45", CurrentUserId = currentUserId, AvatarUrl = "Assets/77.jpg" },
                     new MessageItem { SenderId = currentUserId, Message = "OK luôn", MessageStatus = "Sent", TimeStamp = "09:46", CurrentUserId = currentUserId }
                 },
                 [6] = new List<MessageItem>
