@@ -7,6 +7,7 @@
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<UseWPF>true</UseWPF>
+		<ApplicationIcon>Lynx-V2.ico</ApplicationIcon>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -31,6 +32,7 @@
 	  <None Remove="Assets\icon_search.png" />
 	  <None Remove="Assets\image_icon.png" />
 	  <None Remove="Assets\image_icon_1.png" />
+	  <None Remove="Assets\Lynx-V2.ico" />
 	  <None Remove="Assets\panel_toggle_icon.png" />
 	  <None Remove="Assets\Screenshot_52.png" />
 	  <None Remove="Assets\Sheikah%283%29.jpg" />
@@ -53,6 +55,7 @@
 	  <Content Include="Assets\aw_hexagons_pink_head_1920x1080_hd_screenfill_2021.jpeg">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
+	  <Content Include="Lynx-V2.ico" />
 	  <Resource Include="Assets\call_icon.png">
 	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
 	  </Resource>
@@ -128,6 +131,9 @@
 		<Resource Include="Assets\insta.png" />
 		<Resource Include="Assets\LogoGrayBack.png" />
 		<Resource Include="Assets\LogoWhiteBack.png" />
+		<Resource Include="Assets\Lynx-V2.ico">
+		  <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+		</Resource>
 		<Resource Include="Assets\mic.png" />
 		<Resource Include="Assets\more.png" />
 		<Resource Include="Assets\muscle.png" />
