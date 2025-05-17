@@ -3,6 +3,8 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using Microsoft.Win32;
+using System.Windows.Media;
+using LynxUI_Main.Models;
 
 namespace LynxUI_Main.Custom_Controls
 {
@@ -68,6 +70,23 @@ namespace LynxUI_Main.Custom_Controls
                 if (DataContext is LynxUI_Main.ViewModels.ConversationViewModel vm)
                 {
                     vm.SendFile(selectedFile);
+                }
+            }
+        }
+        private void PlayVideoButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Tìm MediaElement cùng Grid với nút Play
+            if (sender is Button btn &&
+                VisualTreeHelper.GetParent(btn) is Grid grid)
+            {
+                foreach (var child in grid.Children)
+                {
+                    if (child is MediaElement media)
+                    {
+                        media.Position = TimeSpan.Zero; // Phát lại từ đầu nếu muốn
+                        media.Play();
+                        break;
+                    }
                 }
             }
         }

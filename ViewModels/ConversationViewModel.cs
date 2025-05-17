@@ -160,15 +160,21 @@ namespace LynxUI_Main.ViewModels
             if (string.IsNullOrWhiteSpace(filePath) || !File.Exists(filePath))
                 return;
 
+            // Danh sách các định dạng video phổ biến
+            var videoExtensions = new[] { ".mp4", ".avi", ".mov", ".wmv", ".mkv", ".webm" };
+            string ext = Path.GetExtension(filePath).ToLower();
+
             var message = new MessageItem
             {
                 SenderId = ActiveChat?.CurrentUserId ?? 0,
                 SenderName = "Bạn",
-                Message = "[Tệp]",
-                IsFile = true,
+                Message = videoExtensions.Contains(ext) ? "[Video]" : "[Tệp]",
+                IsFile = !videoExtensions.Contains(ext),
+                IsVideo = videoExtensions.Contains(ext),
                 FileName = Path.GetFileName(filePath),
                 FileSource = filePath,
                 FileSize = new FileInfo(filePath).Length.ToString(),
+                VideoSource = videoExtensions.Contains(ext) ? filePath : null,
                 MessageStatus = "Sent",
                 TimeStamp = DateTime.Now.ToString("HH:mm"),
                 CurrentUserId = ActiveChat?.CurrentUserId ?? 0
@@ -179,6 +185,7 @@ namespace LynxUI_Main.ViewModels
 
             // TODO: Gửi lên server nếu cần
         }
+
 
 
 
