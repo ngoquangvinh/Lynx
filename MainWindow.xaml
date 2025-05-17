@@ -6,8 +6,8 @@
        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
        xmlns:local="clr-namespace:LynxUI_Main"
        xmlns:converters="clr-namespace:LynxUI_Main.Converters"
-       xmlns:Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero2"
-       x:Class="LynxUI_Main.MainWindow"
+       xmlns:Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero2" xmlns:viewmodels="clr-namespace:LynxUI_Main.ViewModels" d:DataContext="{d:DesignInstance Type=viewmodels:ChatListItem}"
+        x:Class="LynxUI_Main.MainWindow"
        mc:Ignorable="d" x:Name="_mainWindow"
        AllowsTransparency="False"
        Title="MainWindow" Height="800" Width="1400" ResizeMode="CanResize" WindowStartupLocation="CenterScreen">
@@ -59,7 +59,9 @@
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
                     <!-- Header and ConversationControl -->
-                    <Custom_Controls:Conversation x:Name="ConversationControl" Grid.Row="0" BorderBrush="#B7B5B8" />
+                    <Custom_Controls:Conversation x:Name="ConversationControl" Grid.Row="0" 
+                                                  SelectedChat="{Binding SelectedChat}" 
+                                                  BorderBrush="#B7B5B8" />
 
 
                 </Grid>
@@ -70,10 +72,10 @@
         
         <!-- Right Sidebar -->
         <Grid Grid.Column="3" x:Name="SidebarGrid"
-              ClipToBounds="True"
-              Visibility="Visible">
-            
-            
+              ClipToBounds="True" DataContext="{Binding SelectedChat}"
+              Visibility="{Binding SelectedChat, Converter={StaticResource NullToVisibilityConverter}}">
+            <Custom_Controls:SideProfile />
+
         </Grid>
 
     </Grid>
