@@ -1,0 +1,80 @@
+﻿<Window xmlns:Custom_Controls="clr-namespace:LynxUI_Main.Custom_Controls"
+       xmlns:controls="clr-namespace:LynxUI_Main.Custom_Controls"
+       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+       xmlns:local="clr-namespace:LynxUI_Main"
+       xmlns:converters="clr-namespace:LynxUI_Main.Converters"
+       xmlns:Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero2"
+       x:Class="LynxUI_Main.MainWindow"
+       mc:Ignorable="d" x:Name="_mainWindow"
+       AllowsTransparency="False"
+       Title="MainWindow" Height="800" Width="1400" ResizeMode="CanResize" WindowStartupLocation="CenterScreen">
+
+    <Window.Resources>
+        <!-- Global Styles -->
+        <Style TargetType="Image" x:Key="ConversationImageStyle">
+            <Setter Property="Source" Value="{Binding ImageSource, TargetNullValue=/Assets/placeholder-image.png}" />
+        </Style>
+        <Style TargetType="MediaElement">
+            <Setter Property="Source" Value="{Binding VideoSource, TargetNullValue=/Assets/sample-video.mp4}" />
+        </Style>
+        <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
+
+    </Window.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="70"/>
+            <ColumnDefinition Width="400"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto" x:Name="SidebarColumn"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Sidebar Navigation -->
+        <Grid Grid.Column="0" Background="#2a2e4d" ScrollViewer.VerticalScrollBarVisibility="Disabled">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="100"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <Custom_Controls:RoundProfileButton Width="50" ProfileImageSource="/assets/profile1.jpg" IsOnline="True" StrokeBrush="#2a2e4d"/>
+            <Custom_Controls:MenuListControl x:Name="MenuListControl" Grid.Row="1" Margin="0,50,0,0"/>
+        </Grid>
+
+        <!-- Chat List Panel -->
+        <Grid Grid.Column="1">
+                <Custom_Controls:ChatList x:Name="ChatListControl"/>
+        </Grid>
+
+        <!-- Conversation Panel -->
+        <ContentControl Grid.Column="2" x:Name="ConversationPanel"
+                        Background="Transparent" Margin="0,0,0,0"
+                        Visibility="{Binding selectedChat, Converter={StaticResource NullToVisibilityConverter}}">
+
+            <Border Grid.Column="2" BorderThickness=".5,0,.5,0" BorderBrush="#B7B5B8">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <!-- Header and ConversationControl -->
+                    <Custom_Controls:Conversation x:Name="ConversationControl" Grid.Row="0" BorderBrush="#B7B5B8" />
+
+
+                </Grid>
+            </Border>
+
+        </ContentControl>
+        
+        
+        <!-- Right Sidebar -->
+        <Grid Grid.Column="3" x:Name="SidebarGrid"
+              ClipToBounds="True"
+              Visibility="Visible">
+            
+            
+        </Grid>
+
+    </Grid>
+</Window>
