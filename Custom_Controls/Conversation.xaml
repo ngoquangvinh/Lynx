@@ -15,6 +15,7 @@
         <converters:MessageBubbleColorConverter x:Key="MessageBubbleColorConverter"/>
         <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
         <converters:GroupAvatarPositionConverter x:Key="GroupAvatarPositionConverter"/>
+        <converters:GroupNameVisibilityConverter x:Key="GroupNameVisibilityConverter"/>
 
         <DataTemplate x:Key="MessageTemplate" DataType="{x:Type models:MessageItem}">
             <Grid Margin="10">
@@ -51,6 +52,19 @@
                             SnapsToDevicePixels="True">
                         <Grid>
                             <StackPanel>
+                                <TextBlock Text="{Binding SenderName}" 
+                                           FontSize="13" 
+                                           Foreground="Gray"
+                                           Margin="0,0,0,2">
+                                    <TextBlock.Visibility>
+                                        <MultiBinding Converter="{StaticResource GroupNameVisibilityConverter}">
+                                            <!-- Lấy IsGroup từ ConversationViewModel.ActiveChat -->
+                                            <Binding Path="DataContext.ActiveChat.IsGroup" RelativeSource="{RelativeSource AncestorType=ItemsControl}"/>
+                                            <!-- Lấy IsOwnMessage từ MessageItem -->
+                                            <Binding Path="IsOwnMessage"/>
+                                        </MultiBinding>
+                                    </TextBlock.Visibility>
+                                </TextBlock>
 
                                 <!-- TEXT -->
                                 <TextBlock Text="{Binding Message}"
@@ -65,13 +79,13 @@
                                 <!-- IMAGE -->
                                 <Grid Visibility="{Binding IsPicture, Converter={StaticResource BoolToVisibilityConverter}}">
                                     <TextBlock Text="{Binding Message}" Foreground="Red"
-                                   FontWeight="Bold" FontSize="14"
-                                   Visibility="{Binding IsCorrupted, Converter={StaticResource BoolToVisibilityConverter}}"
-                                   HorizontalAlignment="Center"/>
+                                               FontWeight="Bold" FontSize="14"
+                                               Visibility="{Binding IsCorrupted, Converter={StaticResource BoolToVisibilityConverter}}"
+                                               HorizontalAlignment="Center"/>
                                     <Viewbox MaxWidth="300" Margin="0,5">
                                         <Image Source="{Binding ImageSource, Converter={StaticResource SafeImagePathConverter}}"
-                                   Stretch="Uniform"
-                                   Visibility="{Binding IsCorrupted, Converter={StaticResource InvertedBoolToVisibilityConverter}}"/>
+                                               Stretch="Uniform"
+                                               Visibility="{Binding IsCorrupted, Converter={StaticResource InvertedBoolToVisibilityConverter}}"/>
                                     </Viewbox>
                                 </Grid>
 
@@ -81,9 +95,21 @@
                                    FontWeight="Bold" FontSize="14"
                                    Visibility="{Binding IsCorrupted, Converter={StaticResource BoolToVisibilityConverter}}"
                                    HorizontalAlignment="Center"/>
-                                    <MediaElement Source="{Binding VideoSource}" Width="250" Height="160"
-                                      LoadedBehavior="Manual"
-                                      Visibility="{Binding IsCorrupted, Converter={StaticResource InvertedBoolToVisibilityConverter}}"/>
+                                    <Grid Visibility="{Binding IsCorrupted, Converter={StaticResource InvertedBoolToVisibilityConverter}}">
+                                        <MediaElement x:Name="VideoPlayer"
+                                                      Source="{Binding VideoSource}"
+                                                      Width="250" Height="160"
+                                                      LoadedBehavior="Manual"
+                                                      UnloadedBehavior="Stop"/>
+                                        <Button Content="▶"
+                                                Width="40" Height="40"
+                                                VerticalAlignment="Center"
+                                                HorizontalAlignment="Center"
+                                                Background="#80000000"
+                                                Foreground="White"
+                                                FontSize="20"
+                                                Click="PlayVideoButton_Click"/>
+                                    </Grid>
                                 </Grid>
 
                                 <!-- AUDIO -->

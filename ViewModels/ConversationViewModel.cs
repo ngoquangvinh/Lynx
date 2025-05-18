@@ -90,7 +90,55 @@ namespace LynxUI_Main.ViewModels
             message.DownloadFileCommand = new RelayCommand(_ => DownloadWithDialog(message.FileSource));
         }
 
-        private void CheckMissingContent(MessageItem message)
+        public void SendImage(string imagePath)
+        {
+            // Thêm hình ảnh vào danh sách tin nhắn
+            var message = new MessageItem
+            {
+                SenderId = ActiveChat?.CurrentUserId ?? 0,
+                SenderName = "Bạn",
+                Message = "[Hình ảnh]",
+                IsPicture = true,
+                ImageSource = imagePath,
+                MessageStatus = "Sent",
+                TimeStamp = DateTime.Now.ToString("HH:mm"),
+                CurrentUserId = ActiveChat?.CurrentUserId ?? 0
+            };
+            AttachDownloadCommands(message);
+            Messages.Add(message);
+            // TODO: Gửi lên server nếu cần
+        }
+
+        public void SendFile(string filePath)
+        {
+            if (string.IsNullOrWhiteSpace(filePath) || !File.Exists(filePath))
+                return;
+
+            // Danh sách các định dạng video phổ biến
+            var videoExtensions = new[] { ".mp4", ".avi", ".mov", ".wmv", ".mkv", ".webm" };
+            string ext = Path.GetExtension(filePath).ToLower();
+
+            var message = new MessageItem
+            {
+                SenderId = ActiveChat?.CurrentUserId ?? 0,
+                SenderName = "Bạn",
+                Message = videoExtensions.Contains(ext) ? "[Video]" : "[Tệp]",
+                IsFile = !videoExtensions.Contains(ext),
+                IsVideo = videoExtensions.Contains(ext),
+                FileName = Path.GetFileName(filePath),
+                FileSource = filePath,
+                FileSize = new FileInfo(filePath).Length.ToString(),
+                VideoSource = videoExtensions.Contains(ext) ? filePath : string.Empty,
+                MessageStatus = "Sent",
+                TimeStamp = DateTime.Now.ToString("HH:mm"),
+                CurrentUserId = ActiveChat?.CurrentUserId ?? 0
+            };
+            AttachDownloadCommands(message);
+            Messages.Add(message);
+            // TODO: Gửi lên server nếu cần
+        }
+
+        private static void CheckMissingContent(MessageItem message)
         {
             if (message.MessageStatus == "Sent")
             {
@@ -142,19 +190,19 @@ namespace LynxUI_Main.ViewModels
 
     public class RelayCommand : ICommand
     {
-        private readonly Action<object> _execute;
-        private readonly Predicate<object> _canExecute;
+        private readonly Action<object?> _execute;
+        private readonly Predicate<object?>? _canExecute;
 
-        public RelayCommand(Action<object> execute, Predicate<object> canExecute = null)
+        public RelayCommand(Action<object?> execute, Predicate<object?>? canExecute = null)
         {
             _execute = execute;
             _canExecute = canExecute;
         }
 
-        public bool CanExecute(object parameter) => _canExecute == null || _canExecute(parameter);
-        public void Execute(object parameter) => _execute(parameter);
+        public bool CanExecute(object? parameter) => _canExecute == null || _canExecute(parameter);
+        public void Execute(object? parameter) => _execute(parameter);
 
-        public event EventHandler CanExecuteChanged
+        public event EventHandler? CanExecuteChanged
         {
             add => CommandManager.RequerySuggested += value;
             remove => CommandManager.RequerySuggested -= value;

@@ -1,0 +1,641 @@
+diff --git a/Assets/Lynx-V2.ico b/Assets/Lynx-V2.ico
+deleted file mode 100644
+index e65d146..0000000
+Binary files a/Assets/Lynx-V2.ico and /dev/null differ
+diff --git a/Converters/GroupNameVisibilityConverter.cs b/Converters/GroupNameVisibilityConverter.cs
+new file mode 100644
+index 0000000..f215c5e
+--- /dev/null
++++ b/Converters/GroupNameVisibilityConverter.cs
+@@ -0,0 +1,28 @@
++﻿using System;
++using System.Globalization;
++using System.Windows;
++using System.Windows.Data;
++
++namespace LynxUI_Main.Converters
++{
++    public class GroupNameVisibilityConverter : IMultiValueConverter
++    {
++        public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
++        {
++            // values[0]: IsGroup (bool), values[1]: IsOwnMessage (bool)
++            if (values.Length == 2 &&
++                values[0] is bool isGroup &&
++                values[1] is bool isOwnMessage)
++            {
++                // Chỉ hiện tên nếu là nhóm và không phải tin nhắn của chính mình
++                return (isGroup && !isOwnMessage) ? Visibility.Visible : Visibility.Collapsed;
++            }
++            return Visibility.Collapsed;
++        }
++
++        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
++        {
++            throw new NotImplementedException();
++        }
++    }
++}
+diff --git a/Custom_Controls/Conversation.xaml b/Custom_Controls/Conversation.xaml
+index c4f613e..a706be2 100644
+--- a/Custom_Controls/Conversation.xaml
++++ b/Custom_Controls/Conversation.xaml
+@@ -2,7 +2,6 @@
+              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              xmlns:models="clr-namespace:LynxUI_Main.Models"
+-             xmlns:controls="clr-namespace:LynxUI_Main.Custom_Controls"
+              xmlns:converters="clr-namespace:LynxUI_Main.Converters">
+ 
+     <UserControl.Resources>
+@@ -14,7 +13,8 @@
+         <converters:BoolToAlignmentConverter x:Key="BoolToAlignmentConverter"/>
+         <converters:MessageBubbleColorConverter x:Key="MessageBubbleColorConverter"/>
+         <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
+-        <converters:GroupAvatarPositionConverter x:Key="GroupAvatarPositionConverter"/>
++        <converters:GroupNameVisibilityConverter x:Key="GroupNameVisibilityConverter"/>
++
+ 
+         <DataTemplate x:Key="MessageTemplate" DataType="{x:Type models:MessageItem}">
+             <Grid Margin="10">
+@@ -51,6 +51,20 @@
+                             SnapsToDevicePixels="True">
+                         <Grid>
+                             <StackPanel>
++                                <TextBlock Text="{Binding SenderName}"
++                                           FontWeight="Bold"
++                                           Foreground="DarkSlateBlue"
++                                           FontSize="13"
++                                           Margin="0,0,0,2">        
++                                    <TextBlock.Visibility>
++                                        <MultiBinding Converter="{StaticResource GroupNameVisibilityConverter}">
++                                            <!-- Lấy IsGroup từ ConversationViewModel.ActiveChat -->
++                                            <Binding Path="DataContext.ActiveChat.IsGroup" RelativeSource="{RelativeSource AncestorType=ItemsControl}" />
++                                            <!-- Lấy IsOwnMessage từ MessageItem -->
++                                            <Binding Path="IsOwnMessage"/>
++                                        </MultiBinding>
++                                    </TextBlock.Visibility>
++                                </TextBlock>
+ 
+                                 <!-- TEXT -->
+                                 <TextBlock Text="{Binding Message}"
+@@ -76,7 +90,7 @@
+                                 </Grid>
+ 
+                                 <!-- VIDEO -->
+-                                <Grid Visibility="{Binding IsVideo, Converter={StaticResource BoolToVisibilityConverter}}">
++                                <!--Grid Visibility="{Binding IsVideo, Converter={StaticResource BoolToVisibilityConverter}}">
+                                     <TextBlock Text="{Binding Message}" Foreground="Red"
+                                    FontWeight="Bold" FontSize="14"
+                                    Visibility="{Binding IsCorrupted, Converter={StaticResource BoolToVisibilityConverter}}"
+@@ -84,8 +98,33 @@
+                                     <MediaElement Source="{Binding VideoSource}" Width="250" Height="160"
+                                       LoadedBehavior="Manual"
+                                       Visibility="{Binding IsCorrupted, Converter={StaticResource InvertedBoolToVisibilityConverter}}"/>
++                                </Grid>-->
++                                <!-- VIDEO -->
++                                <Grid Visibility="{Binding IsVideo, Converter={StaticResource BoolToVisibilityConverter}}">
++                                    <TextBlock Text="{Binding Message}" Foreground="Red"
++                                        FontWeight="Bold" FontSize="14"
++                                        Visibility="{Binding IsCorrupted, Converter={StaticResource BoolToVisibilityConverter}}"
++                                        HorizontalAlignment="Center"/>
++                                    <Grid Visibility="{Binding IsCorrupted, Converter={StaticResource InvertedBoolToVisibilityConverter}}">
++                                        <MediaElement x:Name="VideoPlayer"
++                                                      Source="{Binding VideoSource}"
++                                                      Width="250" Height="160"
++                                                      LoadedBehavior="Manual"
++                                                      UnloadedBehavior="Stop"/>
++                                        <Button Content="▶"
++                                                Width="40" Height="40"
++                                                VerticalAlignment="Center"
++                                                HorizontalAlignment="Center"
++                                                Background="#80000000"
++                                                Foreground="White"
++                                                FontSize="20"
++                                                Click="PlayVideoButton_Click"/>
++                                    </Grid>
+                                 </Grid>
+ 
++
++
++
+                                 <!-- AUDIO -->
+                                 <StackPanel Orientation="Horizontal" Margin="0,5"
+                                 Visibility="{Binding IsAudio, Converter={StaticResource BoolToVisibilityConverter}}">
+@@ -137,68 +176,23 @@
+ 
+         <!-- Row 0: HEADER -->
+         <Border Grid.Row="0" Background="Transparent" BorderThickness="0,0,0,1" BorderBrush="LightGray">
+-            <DockPanel Margin="10,5" Visibility="{Binding ActiveChat, Converter={StaticResource NullToVisibilityConverter}}">
+-                <StackPanel Orientation="Horizontal" DockPanel.Dock="Left" VerticalAlignment="Center">
+-                    <!-- Group Avatar -->
+-                    <Grid Width="48" Height="48"
+-                          Visibility="{Binding ActiveChat.IsGroup, Converter={StaticResource BoolToVisibilityConverter}}">
+-                        <ItemsControl ItemsSource="{Binding ActiveChat.AvatarSlots}" AlternationCount="10">
+-                            <ItemsControl.ItemsPanel>
+-                                <ItemsPanelTemplate>
+-                                    <Canvas Width="48" Height="48" />
+-                                </ItemsPanelTemplate>
+-                            </ItemsControl.ItemsPanel>
+-                            <ItemsControl.ItemTemplate>
+-                                <DataTemplate>
+-                                    <Image Width="30" Height="30"
+-                           Source="{Binding Converter={StaticResource SafeImagePathConverter}}"
+-                           Stretch="UniformToFill" ClipToBounds="True">
+-                                        <Image.Clip>
+-                                            <EllipseGeometry Center="15,15" RadiusX="15" RadiusY="15" />
+-                                        </Image.Clip>
+-                                    </Image>
+-                                </DataTemplate>
+-                            </ItemsControl.ItemTemplate>
+-                            <ItemsControl.ItemContainerStyle>
+-                                <Style TargetType="ContentPresenter">
+-                                    <Setter Property="Canvas.Left">
+-                                        <Setter.Value>
+-                                            <MultiBinding Converter="{StaticResource GroupAvatarPositionConverter}" ConverterParameter="Left">
+-                                                <Binding RelativeSource="{RelativeSource Self}" Path="(ItemsControl.AlternationIndex)"/>
+-                                                <Binding Path="Count" />
+-                                            </MultiBinding>
+-                                        </Setter.Value>
+-                                    </Setter>
+-                                    <Setter Property="Canvas.Top">
+-                                        <Setter.Value>
+-                                            <MultiBinding Converter="{StaticResource GroupAvatarPositionConverter}" ConverterParameter="Top">
+-                                                <Binding RelativeSource="{RelativeSource Self}" Path="(ItemsControl.AlternationIndex)"/>
+-                                                <Binding Path="Count" />
+-                                            </MultiBinding>
+-                                        </Setter.Value>
+-                                    </Setter>
+-                                </Style>
+-                            </ItemsControl.ItemContainerStyle>
+-                        </ItemsControl>
+-                    </Grid>
+-
+-                    <!-- Personal Avatar -->
+-                    <controls:RoundProfileButton Width="42" Height="42"
+-                                  Visibility="{Binding ActiveChat.IsGroup, Converter={StaticResource InvertedBoolToVisibilityConverter}}"
+-                                  ProfileImageSource="{Binding ActiveChat.AvatarImageSource}"
+-                                  IsOnline="{Binding ActiveChat.IsOnline}" />
+-
+-                    <!-- Display Name -->
+-                    <TextBlock Text="{Binding ActiveChat.DisplayName}" FontWeight="Bold" FontSize="16"
+-               VerticalAlignment="Center" Margin="10,0,0,0"/>
++            <DockPanel Margin="10,5" Visibility="{Binding SelectedChat, Converter={StaticResource NullToVisibilityConverter}}">
++                <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
++                    <Ellipse Width="42" Height="42">
++                        <Ellipse.Fill>
++                            <ImageBrush ImageSource="{Binding SelectedChat.AvatarUrls[0]}" />
++                        </Ellipse.Fill>
++                    </Ellipse>
++                    <TextBlock Text="{Binding SelectedChat.DisplayName}" FontWeight="Bold" FontSize="16"
++                               VerticalAlignment="Center" Margin="10,0,0,0"/>
+                 </StackPanel>
+-
+                 <StackPanel Orientation="Horizontal" DockPanel.Dock="Right" HorizontalAlignment="Right"
+                             VerticalAlignment="Center" Margin="0,0,10,0">
+                     <Button Width="32" Height="32" Margin="5" ToolTip="Gọi video" Background="Transparent" BorderBrush="Transparent">
+                         <Image Source="/Assets/call_icon_1.png" RenderOptions.BitmapScalingMode="HighQuality"/>
+                     </Button>
+-                    <Button Width="32" Height="32" Margin="5" ToolTip="Tìm kiếm" Background="Transparent" BorderBrush="Transparent">
++                    <!-- tìm kiếm tin nhắn -->
++                    <Button  Width="32" Height="32" Margin="5" ToolTip="Tìm kiếm" Background="Transparent" BorderBrush="Transparent">
+                         <Image Source="/Assets/icon_search.png" RenderOptions.BitmapScalingMode="HighQuality"/>
+                     </Button>
+                     <Button Width="32" Height="32" Margin="5" ToolTip="Mở rộng" Background="Transparent" BorderBrush="Transparent"
+@@ -216,17 +210,24 @@
+ 
+         <!-- Row 2: TOOLBAR + TEXTBOX GỬI TIN -->
+         <Grid Grid.Row="2" Background="White" Margin="10,0,10,10"
+-              Visibility="{Binding ActiveChat, Converter={StaticResource NullToVisibilityConverter}}">
++              Visibility="{Binding SelectedChat, Converter={StaticResource NullToVisibilityConverter}}">
+             <Grid.RowDefinitions>
+                 <RowDefinition Height="40"/>
+                 <RowDefinition Height="*"/>
+             </Grid.RowDefinitions>
+ 
++            <!-- <Button Content="Gửi hình ảnh" Click="SendImageButton_Click" />
++ -->
++            <!-- <Button Click="SendFileButton_Click" Width="25" Height="25" Margin="5" Background="Transparent" BorderBrush="Transparent">
++    <Image Source="/Assets/attachment.png" RenderOptions.BitmapScalingMode="HighQuality"/>
++</Button>
++ -->
++
+             <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="5">
+-                <Button Width="25" Height="25" Margin="5" Background="Transparent" BorderBrush="Transparent">
++                <Button Click="SendImageButton_Click" Width="25" Height="25" Margin="5" Background="Transparent" BorderBrush="Transparent">
+                     <Image Source="/Assets/image_icon_1.png" RenderOptions.BitmapScalingMode="HighQuality"/>
+                 </Button>
+-                <Button Width="25" Height="25" Margin="5" Background="Transparent" BorderBrush="Transparent">
++                <Button Click="SendFileButton_Click" Width="25" Height="25" Margin="5" Background="Transparent" BorderBrush="Transparent">
+                     <Image Source="/Assets/attachment.png" RenderOptions.BitmapScalingMode="HighQuality"/>
+                 </Button>
+             </StackPanel>
+diff --git a/Custom_Controls/Conversation.xaml.cs b/Custom_Controls/Conversation.xaml.cs
+index 7fbf52d..db026c9 100644
+--- a/Custom_Controls/Conversation.xaml.cs
++++ b/Custom_Controls/Conversation.xaml.cs
+@@ -2,6 +2,9 @@
+ using System.Windows;
+ using System.Windows.Controls;
+ using System.Windows.Input;
++using Microsoft.Win32;
++using System.Windows.Media;
++using LynxUI_Main.Models;
+ 
+ namespace LynxUI_Main.Custom_Controls
+ {
+@@ -16,24 +19,6 @@ namespace LynxUI_Main.Custom_Controls
+             DataContext = new ConversationViewModel();
+         }
+ 
+-        public static readonly DependencyProperty SelectedChatProperty =
+-        DependencyProperty.Register("SelectedChat", typeof(ChatListItem), typeof(Conversation), new PropertyMetadata(null));
+-
+-        public ChatListItem SelectedChat
+-        {
+-            get => (ChatListItem)GetValue(SelectedChatProperty);
+-            set => SetValue(SelectedChatProperty, value);
+-        }
+-
+-        private static void OnSelectedChatChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+-        {
+-            var control = d as Conversation;
+-            if (control?.DataContext is ConversationViewModel vm && e.NewValue is ChatListItem chat)
+-            {
+-                vm.ActiveChat = chat;
+-            }
+-        }
+-
+         private void BtnToggleSidebar_Click(object sender, RoutedEventArgs e)
+         {
+             if (Window.GetWindow(this) is MainWindow mainWindow)
+@@ -50,5 +35,63 @@ namespace LynxUI_Main.Custom_Controls
+                 e.Handled = true; // Ngăn Enter xuống dòng
+             }
+         }
++        private void SendImageButton_Click(object sender, RoutedEventArgs e)
++        {
++            var dialog = new OpenFileDialog
++            {
++                InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures),
++                Filter = "Các tệp hình ảnh|*.jpg;*.jpeg;*.png;*.bmp;*.gif",
++                Title = "Chọn hình ảnh để gửi",
++                Multiselect = false
++            };
++
++            if (dialog.ShowDialog() == true)
++            {
++                string selectedFile = dialog.FileName;
++                if (DataContext is ConversationViewModel vm)
++                {
++                    vm.SendImage(selectedFile);
++                }
++            }
++        }
++        private void SendFileButton_Click(object sender, RoutedEventArgs e)
++        {
++            var dialog = new Microsoft.Win32.OpenFileDialog
++            {
++                InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
++                Filter = "Tất cả các tệp|*.*",
++                Title = "Chọn tệp để gửi",
++                Multiselect = false
++            };
++
++            if (dialog.ShowDialog() == true)
++            {
++                string selectedFile = dialog.FileName;
++                if (DataContext is LynxUI_Main.ViewModels.ConversationViewModel vm)
++                {
++                    vm.SendFile(selectedFile);
++                }
++            }
++        }
++        private void PlayVideoButton_Click(object sender, RoutedEventArgs e)
++        {
++            // Tìm MediaElement cùng Grid với nút Play
++            if (sender is Button btn &&
++                VisualTreeHelper.GetParent(btn) is Grid grid)
++            {
++                foreach (var child in grid.Children)
++                {
++                    if (child is MediaElement media)
++                    {
++                        media.Position = TimeSpan.Zero; // Phát lại từ đầu nếu muốn
++                        media.Play();
++                        break;
++                    }
++                }
++            }
++        }
++
++
++
+     }
+ }
+diff --git a/Custom_Controls/SideProfile.xaml b/Custom_Controls/SideProfile.xaml
+deleted file mode 100644
+index ab2bb73..0000000
+--- a/Custom_Controls/SideProfile.xaml
++++ /dev/null
+@@ -1,77 +0,0 @@
+-﻿<UserControl x:Class="LynxUI_Main.Custom_Controls.SideProfile"
+-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+-             xmlns:local="clr-namespace:LynxUI_Main.Custom_Controls"
+-             xmlns:converters="clr-namespace:LynxUI_Main.Converters"
+-             mc:Ignorable="d" 
+-             d:DesignHeight="450" d:DesignWidth="800">
+-    <UserControl.Resources>
+-        <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+-        <converters:InvertedBoolToVisibilityConverter x:Key="InvertedBoolToVisibilityConverter" />
+-        <converters:SafeImagePathConverter x:Key="SafeImagePathConverter" />
+-        <converters:GroupAvatarPositionConverter x:Key="GroupAvatarPositionConverter" />
+-    </UserControl.Resources>
+-
+-    <Grid>
+-        <StackPanel Margin="20" HorizontalAlignment="Center">
+-            <!-- Avatar Group (If Group Chat) -->
+-            <Grid Width="80" Height="80" Visibility="{Binding IsGroup, Converter={StaticResource BoolToVisibilityConverter}}">
+-                <ItemsControl ItemsSource="{Binding AvatarSlots}" AlternationCount="10">
+-                    <ItemsControl.ItemsPanel>
+-                        <ItemsPanelTemplate>
+-                            <Canvas Width="80" Height="80" />
+-                        </ItemsPanelTemplate>
+-                    </ItemsControl.ItemsPanel>
+-                    <ItemsControl.ItemTemplate>
+-                        <DataTemplate>
+-                            <Image Width="48" Height="48"
+-                                   Source="{Binding Converter={StaticResource SafeImagePathConverter}}"
+-                                   Stretch="UniformToFill" ClipToBounds="True">
+-                                <Image.Clip>
+-                                    <EllipseGeometry Center="24,24" RadiusX="24" RadiusY="24" />
+-                                </Image.Clip>
+-                            </Image>
+-                        </DataTemplate>
+-                    </ItemsControl.ItemTemplate>
+-                    <ItemsControl.ItemContainerStyle>
+-                        <Style TargetType="ContentPresenter">
+-                            <Setter Property="Canvas.Left">
+-                                <Setter.Value>
+-                                    <MultiBinding Converter="{StaticResource GroupAvatarPositionConverter}" ConverterParameter="Left">
+-                                        <Binding RelativeSource="{RelativeSource Self}" Path="(ItemsControl.AlternationIndex)" />
+-                                        <Binding Path="DataContext.AvatarSlots.Count" RelativeSource="{RelativeSource AncestorType=UserControl}" />
+-                                    </MultiBinding>
+-                                </Setter.Value>
+-                            </Setter>
+-                            <Setter Property="Canvas.Top">
+-                                <Setter.Value>
+-                                    <MultiBinding Converter="{StaticResource GroupAvatarPositionConverter}" ConverterParameter="Top">
+-                                        <Binding RelativeSource="{RelativeSource Self}" Path="(ItemsControl.AlternationIndex)" />
+-                                        <Binding Path="DataContext.AvatarSlots.Count" RelativeSource="{RelativeSource AncestorType=UserControl}" />
+-                                    </MultiBinding>
+-                                </Setter.Value>
+-                            </Setter>
+-                        </Style>
+-                    </ItemsControl.ItemContainerStyle>
+-                </ItemsControl>
+-            </Grid>
+-
+-            <!-- Avatar cá nhân (nếu không phải group) -->
+-            <Image Width="80" Height="80"
+-                   Source="{Binding AvatarImageSource, Converter={StaticResource SafeImagePathConverter}}"
+-                   Visibility="{Binding IsGroup, Converter={StaticResource InvertedBoolToVisibilityConverter}}"
+-                   Stretch="UniformToFill" ClipToBounds="True" Margin="0,10">
+-                <Image.Clip>
+-                    <EllipseGeometry Center="40,40" RadiusX="40" RadiusY="40" />
+-                </Image.Clip>
+-            </Image>
+-
+-            <!-- Display Name -->
+-            <TextBlock Text="{Binding DisplayName}"
+-                       FontSize="20" FontWeight="Bold" TextAlignment="Center"
+-                       Margin="0,10,0,0" />
+-        </StackPanel>
+-    </Grid>
+-</UserControl>
+diff --git a/Custom_Controls/SideProfile.xaml.cs b/Custom_Controls/SideProfile.xaml.cs
+deleted file mode 100644
+index fbf8663..0000000
+--- a/Custom_Controls/SideProfile.xaml.cs
++++ /dev/null
+@@ -1,28 +0,0 @@
+-﻿using System;
+-using System.Collections.Generic;
+-using System.Linq;
+-using System.Text;
+-using System.Threading.Tasks;
+-using System.Windows;
+-using System.Windows.Controls;
+-using System.Windows.Data;
+-using System.Windows.Documents;
+-using System.Windows.Input;
+-using System.Windows.Media;
+-using System.Windows.Media.Imaging;
+-using System.Windows.Navigation;
+-using System.Windows.Shapes;
+-
+-namespace LynxUI_Main.Custom_Controls
+-{
+-    /// <summary>
+-    /// Interaction logic for SideProfile.xaml
+-    /// </summary>
+-    public partial class SideProfile : UserControl
+-    {
+-        public SideProfile()
+-        {
+-            InitializeComponent();
+-        }
+-    }
+-}
+diff --git a/Lynx-V2.ico b/Lynx-V2.ico
+deleted file mode 100644
+index e65d146..0000000
+Binary files a/Lynx-V2.ico and /dev/null differ
+diff --git a/Lynx.csproj b/Lynx.csproj
+index 47fa5d4..d30c2bf 100644
+--- a/Lynx.csproj
++++ b/Lynx.csproj
+@@ -7,7 +7,6 @@
+ 		<Nullable>enable</Nullable>
+ 		<ImplicitUsings>enable</ImplicitUsings>
+ 		<UseWPF>true</UseWPF>
+-		<ApplicationIcon>Lynx-V2.ico</ApplicationIcon>
+ 	</PropertyGroup>
+ 
+ 	<ItemGroup>
+@@ -32,7 +31,6 @@
+ 	  <None Remove="Assets\icon_search.png" />
+ 	  <None Remove="Assets\image_icon.png" />
+ 	  <None Remove="Assets\image_icon_1.png" />
+-	  <None Remove="Assets\Lynx-V2.ico" />
+ 	  <None Remove="Assets\panel_toggle_icon.png" />
+ 	  <None Remove="Assets\Screenshot_52.png" />
+ 	  <None Remove="Assets\Sheikah%283%29.jpg" />
+@@ -55,7 +53,6 @@
+ 	  <Content Include="Assets\aw_hexagons_pink_head_1920x1080_hd_screenfill_2021.jpeg">
+ 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+ 	  </Content>
+-	  <Content Include="Lynx-V2.ico" />
+ 	  <Resource Include="Assets\call_icon.png">
+ 	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+ 	  </Resource>
+@@ -131,9 +128,6 @@
+ 		<Resource Include="Assets\insta.png" />
+ 		<Resource Include="Assets\LogoGrayBack.png" />
+ 		<Resource Include="Assets\LogoWhiteBack.png" />
+-		<Resource Include="Assets\Lynx-V2.ico">
+-		  <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+-		</Resource>
+ 		<Resource Include="Assets\mic.png" />
+ 		<Resource Include="Assets\more.png" />
+ 		<Resource Include="Assets\muscle.png" />
+diff --git a/MainWindow.xaml b/MainWindow.xaml
+index cbc38c1..5260922 100644
+--- a/MainWindow.xaml
++++ b/MainWindow.xaml
+@@ -6,8 +6,8 @@
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:LynxUI_Main"
+        xmlns:converters="clr-namespace:LynxUI_Main.Converters"
+-       xmlns:Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero2" xmlns:viewmodels="clr-namespace:LynxUI_Main.ViewModels" d:DataContext="{d:DesignInstance Type=viewmodels:ChatListItem}"
+-        x:Class="LynxUI_Main.MainWindow"
++       xmlns:Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero2"
++       x:Class="LynxUI_Main.MainWindow"
+        mc:Ignorable="d" x:Name="_mainWindow"
+        AllowsTransparency="False"
+        Title="MainWindow" Height="800" Width="1400" ResizeMode="CanResize" WindowStartupLocation="CenterScreen">
+@@ -59,9 +59,7 @@
+                         <RowDefinition Height="*"/>
+                     </Grid.RowDefinitions>
+                     <!-- Header and ConversationControl -->
+-                    <Custom_Controls:Conversation x:Name="ConversationControl" Grid.Row="0" 
+-                                                  SelectedChat="{Binding SelectedChat}" 
+-                                                  BorderBrush="#B7B5B8" />
++                    <Custom_Controls:Conversation x:Name="ConversationControl" Grid.Row="0" BorderBrush="#B7B5B8" />
+ 
+ 
+                 </Grid>
+@@ -72,10 +70,10 @@
+         
+         <!-- Right Sidebar -->
+         <Grid Grid.Column="3" x:Name="SidebarGrid"
+-              ClipToBounds="True" DataContext="{Binding SelectedChat}"
+-              Visibility="{Binding SelectedChat, Converter={StaticResource NullToVisibilityConverter}}">
+-            <Custom_Controls:SideProfile />
+-
++              ClipToBounds="True"
++              Visibility="Visible">
++            
++            
+         </Grid>
+ 
+     </Grid>
+diff --git a/Services/ChatService.cs b/Services/ChatService.cs
+index 66ff05f..1d40401 100644
+--- a/Services/ChatService.cs
++++ b/Services/ChatService.cs
+@@ -53,7 +53,7 @@ namespace LynxUI_Main.Services
+                 },
+                 [5] = new List<MessageItem>
+                 {
+-                    new MessageItem { SenderId = 6, SenderName = "Đức", Message = "Họp chiều mai nha cả nhà. Và tuần sau chúng ta chạy overnight không nghỉ để hoàn thành đồ án cho kịp tiến độ.", MessageStatus = "Received", TimeStamp = "09:45", CurrentUserId = currentUserId, AvatarUrl = "Assets/77.jpg" },
++                    new MessageItem { SenderId = 6, SenderName = "Đức", Message = "Họp chiều mai nha cả nhà.", MessageStatus = "Received", TimeStamp = "09:45", CurrentUserId = currentUserId, AvatarUrl = "Assets/77.jpg" },
+                     new MessageItem { SenderId = currentUserId, Message = "OK luôn", MessageStatus = "Sent", TimeStamp = "09:46", CurrentUserId = currentUserId }
+                 },
+                 [6] = new List<MessageItem>
+diff --git a/ViewModels/ConversationViewModel.cs b/ViewModels/ConversationViewModel.cs
+index 3c01c57..cec4aee 100644
+--- a/ViewModels/ConversationViewModel.cs
++++ b/ViewModels/ConversationViewModel.cs
+@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
+ using System.ComponentModel;
+ using System.IO;
+ using System.Runtime.CompilerServices;
++using System.Windows;
+ using System.Windows.Input;
+ 
+ namespace LynxUI_Main.ViewModels
+@@ -134,6 +135,59 @@ namespace LynxUI_Main.ViewModels
+                 // TODO: xử lý lỗi, ví dụ hiện thông báo cho người dùng
+             }
+         }
++        public void SendImage(string imagePath)
++        {
++            // Thêm hình ảnh vào danh sách tin nhắn
++            var message = new MessageItem
++            {
++                SenderId = ActiveChat?.CurrentUserId ?? 0,
++                SenderName = "Bạn",
++                Message = "[Hình ảnh]",
++                IsPicture = true,
++                ImageSource = imagePath,
++                MessageStatus = "Sent",
++                TimeStamp = DateTime.Now.ToString("HH:mm"),
++                CurrentUserId = ActiveChat?.CurrentUserId ?? 0
++            };
++
++            AttachDownloadCommands(message);
++            Messages.Add(message);
++
++            // TODO: Gửi lên server nếu cần
++        }
++        public void SendFile(string filePath)
++        {
++            if (string.IsNullOrWhiteSpace(filePath) || !File.Exists(filePath))
++                return;
++
++            // Danh sách các định dạng video phổ biến
++            var videoExtensions = new[] { ".mp4", ".avi", ".mov", ".wmv", ".mkv", ".webm" };
++            string ext = Path.GetExtension(filePath).ToLower();
++
++            var message = new MessageItem
++            {
++                SenderId = ActiveChat?.CurrentUserId ?? 0,
++                SenderName = "Bạn",
++                Message = videoExtensions.Contains(ext) ? "[Video]" : "[Tệp]",
++                IsFile = !videoExtensions.Contains(ext),
++                IsVideo = videoExtensions.Contains(ext),
++                FileName = Path.GetFileName(filePath),
++                FileSource = filePath,
++                FileSize = new FileInfo(filePath).Length.ToString(),
++                VideoSource = videoExtensions.Contains(ext) ? filePath : null,
++                MessageStatus = "Sent",
++                TimeStamp = DateTime.Now.ToString("HH:mm"),
++                CurrentUserId = ActiveChat?.CurrentUserId ?? 0
++            };
++
++            AttachDownloadCommands(message);
++            Messages.Add(message);
++
++            // TODO: Gửi lên server nếu cần
++        }
++
++
++
+ 
+         public event PropertyChangedEventHandler PropertyChanged;
+         protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
+@@ -159,6 +213,8 @@ namespace LynxUI_Main.ViewModels
+             add => CommandManager.RequerySuggested += value;
+             remove => CommandManager.RequerySuggested -= value;
+         }
++        
++
+     }
+ 
+     /*public ChatListItem SelectedChatItem
+diff --git a/ViewModels/ViewModel.cs b/ViewModels/ViewModel.cs
+index 47d215b..2a1d934 100644
+--- a/ViewModels/ViewModel.cs
++++ b/ViewModels/ViewModel.cs
+@@ -85,6 +85,7 @@ namespace LynxUI_Main
+             }
+         }
+ 
++
+     }
+ 
+     public class PathDataItem
