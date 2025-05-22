@@ -1,5 +1,6 @@
 ﻿using LynxUI_Main.Helpers;
 using LynxUI_Main.ViewModels;
+using LynxUI_Main.ViewLogin;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
