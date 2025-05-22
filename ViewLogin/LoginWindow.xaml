@@ -129,7 +129,9 @@
                                 Focusable="False"
                                 Cursor="Hand"
                                 Click="TogglePasswordVisibility_Click">
-                                        <Image x:Name="EyeIcon" Source="pack://application:,,,/ViewLogin/Img/123.png" Width="20" Height="20"/>
+                                        <Image x:Name="EyeIcon" Source="pack://application:,,,/ViewLogin/Img/123.png" 
+                                               Width="20" Height="20"
+                                               RenderOptions.BitmapScalingMode="HighQuality"/>
                                     </Button>
                                 </Grid>
 

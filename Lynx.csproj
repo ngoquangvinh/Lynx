@@ -163,14 +163,30 @@
 		<Resource Include="Assets\uit.png" />
 		<Resource Include="Assets\videocall.png" />
 		<Resource Include="Assets\wink.png" />
-		<Resource Include="ViewLogin\Img\123.png" />
-		<Resource Include="ViewLogin\Img\fen.png" />
-		<Resource Include="ViewLogin\Img\login.png" />
-		<Resource Include="ViewLogin\Img\Lynx-V2.ico" />
-		<Resource Include="ViewLogin\Img\Lynx_V2.png" />
-		<Resource Include="ViewLogin\Img\O_eye.png" />
-		<Resource Include="ViewLogin\Img\secure.png" />
-		<Resource Include="ViewLogin\Img\smart.png" />
+		<Resource Include="ViewLogin\Img\123.png">
+		  <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+		</Resource>
+		<Resource Include="ViewLogin\Img\fen.png">
+		  <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+		</Resource>
+		<Resource Include="ViewLogin\Img\login.png">
+		  <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+		</Resource>
+		<Resource Include="ViewLogin\Img\Lynx-V2.ico">
+		  <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+		</Resource>
+		<Resource Include="ViewLogin\Img\Lynx_V2.png">
+		  <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+		</Resource>
+		<Resource Include="ViewLogin\Img\O_eye.png">
+		  <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+		</Resource>
+		<Resource Include="ViewLogin\Img\secure.png">
+		  <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+		</Resource>
+		<Resource Include="ViewLogin\Img\smart.png">
+		  <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+		</Resource>
 	</ItemGroup>
 
 	<!-- Các file code-behind cần thêm -->

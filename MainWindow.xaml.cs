@@ -1,6 +1,5 @@
 ﻿using LynxUI_Main.Helpers;
 using LynxUI_Main.ViewModels;
-using LynxUI_Main.ViewLogin;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
@@ -22,6 +21,7 @@ namespace LynxUI_Main
 
             ChatListControl.DataContext = _chatListViewModel;
             ConversationControl.DataContext = _conversationViewModel;
+            this.DataContext = _chatListViewModel;
 
             _chatListViewModel.PropertyChanged += ChatViewModel_PropertyChanged;
         }

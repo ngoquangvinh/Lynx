@@ -1,5 +1,4 @@
 ﻿<Window xmlns:Custom_Controls="clr-namespace:LynxUI_Main.Custom_Controls"
-       xmlns:controls="clr-namespace:LynxUI_Main.Custom_Controls"
        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -29,7 +28,7 @@
             <ColumnDefinition Width="70"/>
             <ColumnDefinition Width="400"/>
             <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="Auto" x:Name="SidebarColumn"/>
+            <ColumnDefinition Width="0" x:Name="SidebarColumn"/>
         </Grid.ColumnDefinitions>
 
         <!-- Sidebar Navigation -->
@@ -75,7 +74,6 @@
               ClipToBounds="True" DataContext="{Binding SelectedChat}"
               Visibility="{Binding SelectedChat, Converter={StaticResource NullToVisibilityConverter}}">
             <Custom_Controls:SideProfile />
-
         </Grid>
 
     </Grid>
