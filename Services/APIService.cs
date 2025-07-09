@@ -237,7 +237,6 @@ namespace LynxUI_Main.Services
             return null;
         }
 
-
         public async Task<List<UserItem>> GetFriendListAsync(int userId)
         {
             var response = await _httpClient.GetAsync($"{BASE_URL}/api/friend/{userId}/friends");
