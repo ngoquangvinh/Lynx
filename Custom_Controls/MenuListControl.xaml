@@ -100,7 +100,7 @@
             <Setter Property="Focusable" Value="False"/>
         </Style>
 
-        <!-- Settings Button Style (giống icon các menu) -->
+        <!-- Settings Button Style -->
         <Style x:Key="SettingsButtonStyle" TargetType="Button">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>

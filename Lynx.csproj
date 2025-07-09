@@ -7,10 +7,12 @@
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<UseWPF>true</UseWPF>
+		<ApplicationIcon>Lynx-V2.ico</ApplicationIcon>
 	</PropertyGroup>
 
 	<ItemGroup>
 	  <Compile Remove="Converters\Converters.xaml.cs" />
+	  <Compile Remove="ViewModels\ChatViewModel.cs" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -61,6 +63,7 @@
 	  <Content Include="Assets\aw_hexagons_pink_head_1920x1080_hd_screenfill_2021.jpeg">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
+	  <Content Include="Lynx-V2.ico" />
 	  <Resource Include="Assets\call_icon.png">
 	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
 	  </Resource>
@@ -154,6 +157,7 @@
 		</Content>
 		<PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.5" />
 		<PackageReference Include="Microsoft.Data.SqlClient" Version="6.0.2" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 		<Resource Include="Assets\right.png">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Resource>

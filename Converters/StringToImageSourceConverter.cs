@@ -43,7 +43,7 @@ namespace LynxUI_Main.Converters
         {
             try
             {
-                var fallbackPath = Path.GetFullPath("Assets/avatar_default.png");
+                var fallbackPath = Path.Combine(AppContext.BaseDirectory, "Assets", "avatar_default.png");
                 return new BitmapImage(new Uri(fallbackPath, UriKind.Absolute));
             }
             catch

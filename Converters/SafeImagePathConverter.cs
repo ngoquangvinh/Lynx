@@ -1,5 +1,7 @@
-﻿using System.Globalization;
+﻿using System.Diagnostics;
+using System.Globalization;
 using System.IO;
+using System.Windows;
 using System.Windows.Data;
 using System.Windows.Media.Imaging;
 
@@ -7,54 +9,71 @@ namespace LynxUI_Main.Converters
 {
     public class SafeImagePathConverter : IValueConverter
     {
-        private static readonly string FallbackPath = Path.GetFullPath("Assets/avatar_default.png");
+        private static readonly string FallbackPath = Path.Combine(AppContext.BaseDirectory, "Assets", "avatar_default.png");
+        private static readonly string[] SupportedExtensions = { ".jpg", ".jpeg", ".png", ".bmp" };
 
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value is not string path || string.IsNullOrWhiteSpace(path))
-                return LoadImage(FallbackPath);
-
             try
             {
-                Uri uri;
+                if (value == DependencyProperty.UnsetValue || value == null)
+                    return LoadFallback("[Unset or Null]");
+
+                string path = value.ToString();
+                if (string.IsNullOrWhiteSpace(path))
+                    return LoadFallback("[Empty String]");
+
+                Debug.WriteLine($"[Debug] Try load: {path}");
 
                 if (Uri.IsWellFormedUriString(path, UriKind.Absolute))
                 {
-                    uri = new Uri(path, UriKind.Absolute);
+                    Uri uri = new Uri(path, UriKind.Absolute);
+                    return LoadImage(uri);
                 }
-                else
+
+                if (path.StartsWith("/Assets/", StringComparison.OrdinalIgnoreCase) || path.StartsWith("Assets/", StringComparison.OrdinalIgnoreCase))
                 {
-                    string fullPath = Path.GetFullPath(path);
-                    if (!File.Exists(fullPath) || !IsSupportedImage(fullPath))
-                    {
-                        Console.WriteLine("[Skip Image] Invalid file type or missing: " + fullPath);
-                        return LoadImage(FallbackPath);
-                    }
+                    string relativePath = path.TrimStart('/').Replace('/', Path.DirectorySeparatorChar);
+                    string fullPath = Path.Combine(AppContext.BaseDirectory, relativePath);
+                    Debug.WriteLine($"[ResolvedPath] Asset → {fullPath}");
 
-                    uri = new Uri(fullPath, UriKind.Absolute);
+                    return LoadImageFromFile(fullPath);
                 }
 
-                return LoadImage(uri);
+                // Nếu là đường dẫn tương đối hoặc tuyệt đối
+                string resolved = Path.GetFullPath(path);
+                return LoadImageFromFile(resolved);
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[SafeImagePathConverter] Failed to load image: {ex.Message}");
-                return LoadImage(FallbackPath);
+                Debug.WriteLine($"[SafeImagePathConverter] Error: {ex.Message}");
+                return LoadFallback("[Exception]");
             }
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) =>
             throw new NotImplementedException();
 
-        private BitmapImage LoadImage(string path)
+        private BitmapImage LoadImageFromFile(string path)
         {
             try
             {
-                return LoadImage(new Uri(path, UriKind.Absolute));
+                if (!File.Exists(path) || !IsSupportedImage(path))
+                    return LoadFallback($"[File Missing or Unsupported] {path}");
+
+                using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
+                var bitmap = new BitmapImage();
+                bitmap.BeginInit();
+                bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                bitmap.StreamSource = stream;
+                bitmap.EndInit();
+                bitmap.Freeze();
+                return bitmap;
             }
-            catch
+            catch (Exception ex)
             {
-                return new BitmapImage(); // fallback empty image if FallbackPath fails
+                Debug.WriteLine($"[LoadImageFromFile ERROR] {ex.Message}");
+                return LoadFallback("[Failed LoadImageFromFile]");
             }
         }
 
@@ -62,61 +81,58 @@ namespace LynxUI_Main.Converters
         {
             try
             {
+                Debug.WriteLine($"[Resolved URI] {uri}");
+
+                if (uri.IsFile)
+                    return LoadImageFromFile(uri.LocalPath);
+
                 var bitmap = new BitmapImage();
                 bitmap.BeginInit();
                 bitmap.CacheOption = BitmapCacheOption.OnLoad;
-                bitmap.CreateOptions = BitmapCreateOptions.IgnoreColorProfile;
                 bitmap.UriSource = uri;
-
-                try
-                {
-                    bitmap.EndInit();
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"[BitmapImage EndInit ERROR] {ex.Message} (uri = {uri})");
-                    return LoadFallback();
-                }
-
-                if (bitmap.CanFreeze)
-                    bitmap.Freeze();
-
+                bitmap.EndInit();
+                bitmap.Freeze();
                 return bitmap;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[LoadImage(Uri) Outer ERROR] {ex.Message} (uri = {uri})");
-                return LoadFallback();
+                Debug.WriteLine($"[LoadImage ERROR] {ex.Message} (uri = {uri})");
+                return LoadFallback("[Failed LoadImage]");
             }
         }
 
-        private BitmapImage LoadFallback()
+        private BitmapImage LoadFallback(string reason)
         {
             try
             {
+                Debug.WriteLine($"[Fallback Avatar] Reason: {reason}");
+
+                if (!File.Exists(FallbackPath))
+                {
+                    Debug.WriteLine($"[Fallback ERROR] Fallback file not found: {FallbackPath}");
+                    return new BitmapImage();
+                }
+
+                using var stream = new FileStream(FallbackPath, FileMode.Open, FileAccess.Read, FileShare.Read);
                 var fallback = new BitmapImage();
                 fallback.BeginInit();
                 fallback.CacheOption = BitmapCacheOption.OnLoad;
-                fallback.UriSource = new Uri(FallbackPath, UriKind.Absolute);
+                fallback.StreamSource = stream;
                 fallback.EndInit();
-                if (fallback.CanFreeze) fallback.Freeze();
+                fallback.Freeze();
                 return fallback;
             }
-            catch
+            catch (Exception ex)
             {
-                return new BitmapImage(); // fallback rỗng nếu fallback ảnh hỏng
+                Debug.WriteLine($"[Fallback Load Failed] {ex.Message}");
+                return new BitmapImage();
             }
         }
-
-
-
-        private static readonly string[] SupportedExtensions = { ".jpg", ".jpeg", ".png", ".bmp" };
 
         private bool IsSupportedImage(string path)
         {
             string ext = Path.GetExtension(path)?.ToLowerInvariant();
             return SupportedExtensions.Contains(ext);
         }
-
     }
 }

@@ -1,17 +1,19 @@
 ﻿using LynxUI_Main.Helpers;
-using System.IO;
+using System.Diagnostics;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
 
 namespace LynxUI_Main.Models
 {
     public class MessageItem
     {
+        public int MessageId { get; set; }
+        public int ChatId { get; set; }
         public int SenderId { get; set; }
+        public int ReceiverId { get; set; }
         public string SenderName { get; set; }
         public string Message { get; set; }
-        public string TimeStamp { get; set; }
+        public DateTime? TimeStamp { get; set; }
         public string MessageStatus { get; set; } // "Sent" or "Received"  
 
         public bool IsDelete { get; set; }
@@ -40,11 +42,20 @@ namespace LynxUI_Main.Models
         public bool IsCorrupted { get; set; } = false;
         public int CurrentUserId { get; set; }
         public bool IsOwnMessage => SenderId == CurrentUserId;
+        public string AvatarUrl { get; set; }
+        public string SenderAvatarUrl { get; set; }
 
-        public string AvatarUrl { get; set; } = string.Empty;
-
-        public ImageSource AvatarImageSource => ImageHelper.GetAvatarImage(AvatarUrl);
-
+        public ImageSource AvatarImageSource
+        {
+            get
+            {
+                var path = string.IsNullOrWhiteSpace(SenderAvatarUrl) ? "/Assets/avatar_default.png" : SenderAvatarUrl;
+                if (string.IsNullOrWhiteSpace(path))
+                    path = "Assets/avatar_default.png";
+                Debug.WriteLine("[MessageItem] Loading avatar from: " + path);
+                return ImageHelper.GetAvatarImage(path);
+            }
+        }
         public bool IsTextMessage => !IsDelete && !IsPicture && !IsVideo && !IsAudio && !IsFile && !IsSticker && !IsEmoji;
 
         public ICommand DownloadImageCommand { get; set; }
@@ -52,44 +63,5 @@ namespace LynxUI_Main.Models
         public ICommand DownloadAudioCommand { get; set; }
         public ICommand DownloadFileCommand { get; set; }
 
-        private ImageSource LoadImage(string pathOrUrl)
-        {
-            if (string.IsNullOrWhiteSpace(pathOrUrl)) return GetFallback();
-
-            try
-            {
-                var bitmap = new BitmapImage();
-                bitmap.BeginInit();
-                bitmap.CacheOption = BitmapCacheOption.OnLoad;
-                bitmap.CreateOptions = BitmapCreateOptions.IgnoreColorProfile;
-
-                bitmap.UriSource = Uri.IsWellFormedUriString(pathOrUrl, UriKind.Absolute)
-                    ? new Uri(pathOrUrl, UriKind.Absolute)
-                    : new Uri(Path.GetFullPath(pathOrUrl), UriKind.Absolute);
-
-                bitmap.EndInit();
-                return bitmap.SafeFreeze();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"[Avatar Load Error] {ex.Message}");
-                return GetFallback();
-            }
-        }
-
-        private ImageSource GetFallback()
-        {
-            try
-            {
-                var fallbackPath = Path.GetFullPath("Assets/avatar_default.png");
-                var fallback = new BitmapImage(new Uri(fallbackPath, UriKind.Absolute));
-                fallback.Freeze();
-                return fallback;
-            }
-            catch
-            {
-                return null;
-            }
-        }
     }
 }

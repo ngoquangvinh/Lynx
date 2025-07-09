@@ -1,6 +1,4 @@
-﻿using System.Windows;
-
-namespace LynxUI_Main
+﻿namespace LynxUI_Main
 {
     public class ViewModel
     {
@@ -28,7 +26,7 @@ namespace LynxUI_Main
 
             new MenuItems
             {
-                MenuName = "Group",
+                MenuName = "Friends",
                 Paths = new List<PathDataItem>
                 {
                     new PathDataItem
@@ -101,41 +99,5 @@ namespace LynxUI_Main
         public string MenuName { get; set; }
         public bool IsItemSelected { get; set; }
         public double ListItemHeight { get; set; } = 74;
-    }
-
-
-    public class ChatListItems
-    {
-        public bool IsChatSelected { get; set; }
-
-        public bool IsOnline { get; set; }
-
-        public string ContactProfilePic { get; set; }
-
-        public string ContactName { get; set; }
-
-        public string LastMessageTime { get; set; }
-
-        public string Availability { get; set; }
-
-        public bool IsRead { get; set; }
-
-        public string Message { get; set; }
-
-        public string NewMsgCount { get; set; }
-    }
-
-    public class ConversationMessages
-    {
-
-        public string MessageStatus { get; set; }
-
-        public string TimeStamp { get; set; }
-
-        public string Message { get; set; }
-        public string ImageSource { get; set; }
-
-        public bool IsPicture { get; set; }
-        public Visibility IsAudioTrack { get; set; }
     }
 }

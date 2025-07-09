@@ -1,6 +1,6 @@
 ﻿using LynxUI_Main.Helpers;
+using LynxUI_Main.Services;
 using LynxUI_Main.ViewModels;
-using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -8,31 +8,33 @@ namespace LynxUI_Main
 {
     public partial class MainWindow : Window
     {
-        private readonly ChatListViewModel _chatListViewModel;
-        private readonly ConversationViewModel _conversationViewModel;
+        private readonly MainViewModel _mainViewModel;
+        private readonly int _userId;
+        private readonly SignalRService _signalRService;
+        private bool isSidebarOpen = false;
 
-        public MainWindow()
+        public MainWindow(int userId, string displayName)
         {
             InitializeComponent();
 
-            // ViewModels initialization
-            _chatListViewModel = new ChatListViewModel();
-            _conversationViewModel = new ConversationViewModel();
+            _userId = userId;
+            _signalRService = new SignalRService();
 
-            ChatListControl.DataContext = _chatListViewModel;
-            ConversationControl.DataContext = _conversationViewModel;
-            this.DataContext = _chatListViewModel;
+            _mainViewModel = new MainViewModel(userId, _signalRService, displayName);
+            this.DataContext = _mainViewModel;
 
-            _chatListViewModel.PropertyChanged += ChatViewModel_PropertyChanged;
+            ChatListControl.DataContext = _mainViewModel.ChatListVM;
+            ConversationControl.DataContext = _mainViewModel.ConversationVM;
+            ConnectToSignalR();
         }
 
-        private void ChatViewModel_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        private async void ConnectToSignalR()
         {
-            if (e.PropertyName == nameof(ChatListViewModel.SelectedChat))
-            {
-                _conversationViewModel.ActiveChat = _chatListViewModel.SelectedChat;
-            }
+            //string serverUrl = "https://localhost:7031/ChatHub";
+            string serverUrl = "http://203.162.54.169:2090/chatHub"; // Connect to Server
+            await _signalRService.ConnectAsync(serverUrl, _userId);
         }
+
         public void ToggleSidebar()
         {
             double from = SidebarColumn.ActualWidth;
@@ -49,8 +51,6 @@ namespace LynxUI_Main
             isSidebarOpen = !isSidebarOpen;
         }
 
-        private bool isSidebarOpen = false;
-
         private void BtnToggleSidebar_Click(object sender, RoutedEventArgs e)
         {
             var animation = new GridLengthAnimation
@@ -62,6 +62,20 @@ namespace LynxUI_Main
 
             SidebarColumn.BeginAnimation(ColumnDefinition.WidthProperty, animation);
             isSidebarOpen = !isSidebarOpen;
+        }
+
+        public async void ShowFriendTab()
+        {
+            _mainViewModel.ChatListVM.IsChatTabVisible = false;
+            _mainViewModel.ChatListVM.IsFriendTabVisible = true;
+            await _mainViewModel.ChatListVM.LoadFriendsAsync(_userId);
+            await _mainViewModel.ChatListVM.LoadIncomingRequestsAsync(_userId);
+        }
+
+        public void ShowChatTab()
+        {
+            _mainViewModel.ChatListVM.IsFriendTabVisible = false;
+            _mainViewModel.ChatListVM.IsChatTabVisible = true;
         }
     }
 }

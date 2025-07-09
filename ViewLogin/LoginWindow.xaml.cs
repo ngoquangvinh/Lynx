@@ -1,21 +1,19 @@
-﻿using System.Net.Mail;
+﻿using LynxUI_Main.Models;
+using LynxUI_Main.Services;
+using System.Net.Mail;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
-using System.Data.SqlClient;
-using Microsoft.Data.SqlClient;
-using System.Security.Cryptography;
-
-using System.Text;
 namespace LynxUI_Main.ViewLogin
 {
-    public partial class MainWindow : Window
+    public partial class LoginWindow : Window
     {
         private DispatcherTimer introTimer;
         private int currentIndex = 0;
+        public int? LoggedInUserId { get; private set; }
 
         private readonly List<string> imageFiles = new()
         {
@@ -27,7 +25,7 @@ namespace LynxUI_Main.ViewLogin
 
         private readonly List<BitmapImage> introImages = new();
 
-        public MainWindow()
+        public LoginWindow()
         {
             InitializeComponent();
 
@@ -141,6 +139,7 @@ namespace LynxUI_Main.ViewLogin
             var forgotPasswordWindow = new ForgotPasswordWindow();
             forgotPasswordWindow.Show();
             forgotPasswordWindow.Closed += (s, args) => this.Show();
+
         }
 
         // HAM PHAN DANG KI
@@ -161,19 +160,10 @@ namespace LynxUI_Main.ViewLogin
         {
             return ulong.TryParse(phone, out _) && phone.Length >= 10 && phone.Length <= 11;
         }
-        private string HashPassword(string password)
-        {
-            using (SHA256 sha256 = SHA256.Create())
-            {
-                byte[] bytes = Encoding.UTF8.GetBytes(password);
-                byte[] hash = sha256.ComputeHash(bytes);
-                return Convert.ToBase64String(hash);
-            }
-        }
 
 
-        // PHAN DANG KI
-        private void Register_Click(object sender, RoutedEventArgs e)
+        // SIGNUP
+        private async void Register_Click(object sender, RoutedEventArgs e)
         {
             string fullName = FullNameBox.Text.Trim();
             string username = UsernameBox.Text.Trim();
@@ -197,7 +187,7 @@ namespace LynxUI_Main.ViewLogin
 
             if (!IsValidPhone(phone))
             {
-                MessageBox.Show("Invalid phone number. It must be numeric and 10–11 digits.");
+                MessageBox.Show("Invalid phone number. It must be numeric and 10 digits.");
                 return;
             }
 
@@ -213,110 +203,99 @@ namespace LynxUI_Main.ViewLogin
                 return;
             }
 
-            string hashedPassword = HashPassword(password);
-
-            string connectionString = "Server=TRUNGPC;Database=UserProfileDB;Trusted_Connection=True;TrustServerCertificate=True;"; // sửa lại cho đúng
+            var Rmodel = new RegisterModel
+            {
+                UserName = username,
+                Password = password,
+                FullName = fullName,
+                Email = email,
+                Phone = phone,
+                AvatarUrl = "/Assets/avatar_default.png", // (lấy từ UI nếu có)
+                Birthday = birthday
+            };
 
             try
             {
-                using (SqlConnection conn = new SqlConnection(connectionString))
+                await ApiService.RegisterAsync(Rmodel);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("❌ Error: " + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+
+
+            var Lmodel = new LoginModel
+            {
+                UsernameOrEmail = email,
+                Password = password
+            };
+
+            try
+            {
+                var loginResult = await ApiService.LoginAsync(Lmodel);
+                var api = new ApiService();
+                var user = await api.GetUserByIdAsync(loginResult.UserId);
+                if (loginResult != null && loginResult.Success)
                 {
-                    conn.Open();
-
-                    // Check if username already exists
-                    string checkQuery = "SELECT COUNT(*) FROM Users WHERE Username = @Username";
-                    using (SqlCommand checkCmd = new SqlCommand(checkQuery, conn))
-                    {
-                        checkCmd.Parameters.AddWithValue("@Username", username);
-                        int exists = (int)checkCmd.ExecuteScalar();
-                        if (exists > 0)
-                        {
-                            MessageBox.Show("Username already exists. Please choose another one.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                            return;
-                        }
-                    }
-
-                    // Insert user into database
-                    string insertQuery = @"INSERT INTO User1s (FullName, Username, Phone, Email, Password, Birthday)
-                                   VALUES (@FullName, @Username, @Phone, @Email, @Password, @Birthday)";
-                    using (SqlCommand cmd = new SqlCommand(insertQuery, conn))
-                    {
-                        cmd.Parameters.AddWithValue("@FullName", fullName);
-                        cmd.Parameters.AddWithValue("@Username", username);
-                        cmd.Parameters.AddWithValue("@Phone", phone);
-                        cmd.Parameters.AddWithValue("@Email", email);
-                        cmd.Parameters.AddWithValue("@Password", hashedPassword);
-                        cmd.Parameters.AddWithValue("@Birthday", birthday.Value);
-
-                        int rows = cmd.ExecuteNonQuery();
-                        if (rows > 0)
-                        {
-                            MessageBox.Show("✅ Account created successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
-                            BackToLogin_MouseDown(null, null);
-                        }
-                        else
-                        {
-                            MessageBox.Show("❌ Registration failed!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                        }
-                    }
+                    LoggedInUserId = loginResult.UserId;
+                    // Open MainWindow and close LoginWindow  
+                    var mainWindow = new LynxUI_Main.MainWindow(LoggedInUserId ?? 0, user.DisplayName);
+                    Application.Current.MainWindow = mainWindow;
+                    mainWindow.Show();
+                    this.Close();
+                }
+                else
+                {
+                    MessageBox.Show("Login failed. Please check your credentials.", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show("❌ Error: " + ex.Message, "Database Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("❌ Error: " + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
-        // PHAN DANG NHAP
-        private void SignInButton_Click(object sender, RoutedEventArgs e)
+        // LOGIN
+        private async void SignInButton_Click(object sender, RoutedEventArgs e)
         {
-            string email = EmailBox_Login.Text.Trim();
+            string usernameOrEmail = EmailBox_Login.Text.Trim();
             string password = PasswordBox_Login.Password.Trim();
 
-            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
+            if (string.IsNullOrEmpty(usernameOrEmail) || string.IsNullOrEmpty(password))
             {
-                MessageBox.Show("Please enter both email and password.", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Please enter both username/email and password.", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            string hashedPassword = HashPassword(password);
-
-            string connectionString = "Server=TRUNGPC;Database=UserProfileDB;Trusted_Connection=True;TrustServerCertificate=True;";
+            var model = new LoginModel
+            {
+                UsernameOrEmail = usernameOrEmail,
+                Password = password
+            };
 
             try
             {
-                using (SqlConnection conn = new SqlConnection(connectionString))
+                var loginResult = await ApiService.LoginAsync(model);
+                var api = new ApiService();
+                var user = await api.GetUserByIdAsync(loginResult.UserId);
+
+                if (loginResult != null && loginResult.Success)
                 {
-                    conn.Open();
-                    string query = "SELECT COUNT(*) FROM User1s WHERE Email = @Email AND Password = @Password";
-                    using (SqlCommand cmd = new SqlCommand(query, conn))
-                    {
-                        cmd.Parameters.AddWithValue("@Email", email);
-                        cmd.Parameters.AddWithValue("@Password", hashedPassword);
-
-                        int match = (int)cmd.ExecuteScalar();
-                        if (match > 0)
-                        {
-                            MessageBox.Show("✅ Login successful!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
-
-                            // Mở MainWindow
-                            var mainWindow = new LynxUI_Main.MainWindow();
-                            Application.Current.MainWindow = mainWindow;
-                            mainWindow.Show();
-
-                            // Đóng LoginWindow
-                            this.Close();
-                        }
-                        else
-                        {
-                            MessageBox.Show("❌ Invalid email or password.", "Login Failed", MessageBoxButton.OK, MessageBoxImage.Error);
-                        }
-                    }
+                    LoggedInUserId = loginResult.UserId;
+                    // Open MainWindow and close LoginWindow  
+                    var mainWindow = new LynxUI_Main.MainWindow(LoggedInUserId ?? 0, user.DisplayName);
+                    Application.Current.MainWindow = mainWindow;
+                    mainWindow.Show();
+                    this.Close();
+                }
+                else
+                {
+                    MessageBox.Show("Login failed. Please check your credentials.", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show("❌ Error: " + ex.Message, "Database Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("❌ Error: " + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 

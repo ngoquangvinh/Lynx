@@ -13,8 +13,21 @@ namespace LynxUI_Main.Custom_Controls
         public Conversation()
         {
             InitializeComponent();
-            DataContext = new ConversationViewModel();
         }
+
+
+        /*private static void OnUserIdChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is Conversation control && e.NewValue is int userId)
+            {
+                var viewModel = new ConversationViewModel(userId);
+
+                if (control.SelectedChat != null)
+                    viewModel.ActiveChat = control.SelectedChat;
+
+                control.DataContext = viewModel;
+            }
+        }*/
 
         public static readonly DependencyProperty SelectedChatProperty =
         DependencyProperty.Register("SelectedChat", typeof(ChatListItem), typeof(Conversation), new PropertyMetadata(null));

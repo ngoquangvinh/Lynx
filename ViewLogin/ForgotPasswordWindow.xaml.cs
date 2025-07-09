@@ -1,4 +1,6 @@
-﻿using System;
+﻿using LynxUI_Main.Models;
+using LynxUI_Main.Services;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -22,7 +24,7 @@ namespace LynxUI_Main.ViewLogin
             InitializeComponent();
         }
 
-        private void ResetPassword_Click(object sender, RoutedEventArgs e)
+        private async void ResetPassword_Click(object sender, RoutedEventArgs e)
         {
             string email = EmailBox.Text.Trim();
 
@@ -32,7 +34,12 @@ namespace LynxUI_Main.ViewLogin
                 return;
             }
 
-            StatusText.Text = $"Reset link sent to {email} (simulated).";
+            var model = new ForgotPasswordModel
+            {
+                Email = email
+            };
+
+            await ApiService.ForgotPasswordAsync(model);
         }
         private void BackToLoginButton_Click(object sender, RoutedEventArgs e)
         {

@@ -61,10 +61,10 @@ namespace LynxUI_Main.ViewLogin
                 return;
             }
 
-            // ✅ Kiểm tra số điện thoại: chỉ số, dài 10–11
+            // ✅ Kiểm tra số điện thoại: chỉ số, dài 10
             if (!IsValidPhone(phone))
             {
-                MessageBox.Show("❌ Phone number must be numeric and 10–11 digits.");
+                MessageBox.Show("❌ Phone number must be numeric and 10 digits.");
                 return; // Thêm câu lệnh return này
             }
 

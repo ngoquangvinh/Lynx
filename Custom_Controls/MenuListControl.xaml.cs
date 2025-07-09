@@ -52,6 +52,22 @@ namespace LynxUI_Main.Custom_Controls
                     }
                 }
             }
+
+            if (MenuList.SelectedItem is MenuItems selectedItem)
+            {
+                switch (selectedItem.MenuName)
+                {
+                    case "Chat":
+                        ((MainWindow)Application.Current.MainWindow)?.ShowChatTab();
+                        break;
+                    case "Friends":
+                        ((MainWindow)Application.Current.MainWindow)?.ShowFriendTab();
+                        break;
+                    case "Notification":
+                        // Handle notification case if needed
+                        break;
+                }
+            }
         }
 
 

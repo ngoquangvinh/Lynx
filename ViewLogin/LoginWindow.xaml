@@ -1,4 +1,4 @@
-﻿<Window x:Class="LynxUI_Main.ViewLogin.MainWindow"
+﻿<Window x:Class="LynxUI_Main.ViewLogin.LoginWindow"
        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"  
        Title="Login" Height="680" Width="1200"
@@ -113,7 +113,7 @@
                                TextAlignment="Center"
                                FontFamily="Arial"/>
 
-                                <TextBlock Text="Email" FontWeight="SemiBold" Margin="0,10,0,5" FontSize="14" FontFamily="Arial"/>
+                                <TextBlock Text="Username or Email" FontWeight="SemiBold" Margin="0,10,0,5" FontSize="14" FontFamily="Arial"/>
                                 <TextBox x:Name="EmailBox_Login" Height="35" Padding="8" FontSize="14" FontFamily="Arial" VerticalContentAlignment="Center"/>
 
                                 <TextBlock Text="Password" FontWeight="SemiBold" Margin="0,10,0,5" FontSize="14" FontFamily="Arial"/>

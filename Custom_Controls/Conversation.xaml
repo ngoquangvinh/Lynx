@@ -35,7 +35,7 @@
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
                     <!-- Avatar trái -->
-                    <Image Grid.Row="0" Grid.Column="0" Source="{Binding AvatarImageSource}"
+                    <Image Grid.Row="0" Grid.Column="0" Source="{Binding SenderAvatarUrl, Converter={StaticResource SafeImagePathConverter}}"
                            Width="36" Height="36" Margin="0,5,5,5" HorizontalAlignment="Left"
                            Visibility="{Binding IsOwnMessage, Converter={StaticResource InvertedBoolToVisibilityConverter}}"
                            ClipToBounds="True">
@@ -151,8 +151,8 @@
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
                                     <Image Width="30" Height="30"
-                           Source="{Binding Converter={StaticResource SafeImagePathConverter}}"
-                           Stretch="UniformToFill" ClipToBounds="True">
+                                       Source="{Binding ., Converter={StaticResource SafeImagePathConverter}}"
+                                       Stretch="UniformToFill" ClipToBounds="True">
                                         <Image.Clip>
                                             <EllipseGeometry Center="15,15" RadiusX="15" RadiusY="15" />
                                         </Image.Clip>
@@ -185,7 +185,7 @@
                     <!-- Personal Avatar -->
                     <controls:RoundProfileButton Width="42" Height="42"
                                   Visibility="{Binding ActiveChat.IsGroup, Converter={StaticResource InvertedBoolToVisibilityConverter}}"
-                                  ProfileImageSource="{Binding ActiveChat.AvatarImageSource}"
+                                  ProfileImageSource="{Binding ActiveChat.AvatarImageSource, Converter={StaticResource SafeImagePathConverter}}"
                                   IsOnline="{Binding ActiveChat.IsOnline}" />
 
                     <!-- Display Name -->
@@ -240,8 +240,8 @@
                 <TextBox Grid.Column="0" Text="{Binding NewMessageText, UpdateSourceTrigger=PropertyChanged}" 
                          FontSize="14" Padding="10" AcceptsReturn="True" TextWrapping="Wrap" PreviewKeyDown="TextBox_PreviewKeyDown"
                          VerticalScrollBarVisibility="Auto" Height="45" VerticalAlignment="Center" HorizontalAlignment="Stretch" />
-                <Button Grid.Column="1" Width="45" Content="📩" Background="Transparent" BorderBrush="Transparent"
-                        RenderOptions.BitmapScalingMode="HighQuality" Command="{Binding SendCommand}" Margin="5,0,0,0"/>
+                <!-- <Button Grid.Column="1" Width="45" Content="📩" Background="Transparent" BorderBrush="Transparent"
+                        RenderOptions.BitmapScalingMode="HighQuality" Command="{Binding SendCommand}" Margin="5,0,0,0"/> -->
             </Grid>
         </Grid>
     </Grid>

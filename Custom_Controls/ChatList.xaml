@@ -3,7 +3,10 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:converters="clr-namespace:LynxUI_Main.Converters"
              xmlns:controls="clr-namespace:LynxUI_Main.Custom_Controls"
-             xmlns:vm="clr-namespace:LynxUI_Main.ViewModels">
+             xmlns:vm="clr-namespace:LynxUI_Main.ViewModels"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"  
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"  
+             mc:Ignorable="d">
 
     <UserControl.Resources>
         <converters:BoolToBrushConverter x:Key="BoolToBrushConverter" OnlineBrush="LimeGreen" OfflineBrush="Gray" />
@@ -110,7 +113,8 @@
         <!-- Separator line -->
         <Border Grid.Row="1" Height="1" Background="#DDD" Margin="10,0,10,5" />
 
-            <ListBox x:Name="ChatListBox" Grid.Row="2"
+        <Grid Grid.Row="2">
+            <ListBox x:Name="ChatListBox" 
                      Style="{StaticResource ChatListBoxStyle}"
                      ItemsSource="{Binding Chats}"
                      SelectedItem="{Binding SelectedChat, Mode=TwoWay}"
@@ -140,7 +144,7 @@
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
                                             <Image Width="30" Height="30"
-                                               Source="{Binding Converter={StaticResource SafeImagePathConverter}}"
+                                               Source="{Binding AvatarImageSource, Converter={StaticResource SafeImagePathConverter}}"
                                                Stretch="UniformToFill" ClipToBounds="True">
                                                 <Image.Clip>
                                                     <EllipseGeometry Center="15,15" RadiusX="15" RadiusY="15" />
@@ -174,7 +178,7 @@
                             <!-- Personal Avatar -->
                             <controls:RoundProfileButton Grid.Column="0" Width="40" Height="40"
                             Visibility="{Binding IsGroup, Converter={StaticResource InvertedBoolToVisibilityConverter}}"
-                            ProfileImageSource="{Binding AvatarImageSource, FallbackValue='/Assets/avatar_default.png'}"
+                            ProfileImageSource="{Binding AvatarImageSource, Converter={StaticResource SafeImagePathConverter}}"
                             IsOnline="{Binding IsOnline}" />
 
                             <!-- Name + Message -->
@@ -213,5 +217,88 @@
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>
+            <ScrollViewer VerticalScrollBarVisibility="Hidden" BorderThickness="0,0,1,0">
+                <StackPanel>
+                    <!-- Friend List -->
+                    <ListBox x:Name="FriendListBox"
+                     Visibility="{Binding IsFriendTabVisible, Converter={StaticResource BoolToVisibilityConverter}}"
+                     Style="{StaticResource ChatListBoxStyle}"
+                     ItemsSource="{Binding Friends}"                     
+                     MouseDoubleClick="FriendsListBox_MouseDoubleClick"
+                     ScrollViewer.VerticalScrollBarVisibility="Hidden"
+                     Background="Transparent">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Margin="10">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <!-- Avatar -->
+                                    <controls:RoundProfileButton Grid.Column="0" Width="40" Height="40"
+                                    ProfileImageSource="{Binding AvatarImageSource, Converter={StaticResource SafeImagePathConverter}}"
+                                    IsOnline="{Binding IsOnline}" />
+
+                                    <!-- Info -->
+                                    <StackPanel Grid.Column="1" Margin="10,0">
+                                        <TextBlock Text="{Binding DisplayName}" FontWeight="Bold" FontSize="14" TextTrimming="CharacterEllipsis" />
+                                        <TextBlock>
+                                            <Run Text="ID: #" />
+                                            <Run Text="{Binding Id}" />
+                                        </TextBlock>
+                                    </StackPanel>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+
+                    <!-- Incoming Friend Requests -->
+                    <ListBox x:Name="IncomingRequestListBox"
+                     Visibility="{Binding IsFriendTabVisible, Converter={StaticResource BoolToVisibilityConverter}}"
+                     ItemsSource="{Binding IncomingRequests}" BorderThickness="0,0,1,0"
+                     Background="Transparent">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Margin="10">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <!-- Avatar -->
+                                    <controls:RoundProfileButton Grid.Column="0"
+                                             Width="40" Height="40"
+                                             ProfileImageSource="{Binding AvatarImageSource, Converter={StaticResource SafeImagePathConverter}}"
+                                             IsOnline="{Binding IsOnline}" />
+
+                                    <!-- Info -->
+                                    <StackPanel Grid.Column="1" Margin="10,0">
+                                        <TextBlock Text="{Binding DisplayName}" FontWeight="Bold" FontSize="14"/>
+                                        <TextBlock>
+                                            <Run Text="ID: #" />
+                                            <Run Text="{Binding Id}" />
+                                        </TextBlock>
+                                    </StackPanel>
+
+                                    <!-- Accept/Reject -->
+                                    <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                                        <Button Width="24" Height="24" Margin="0,0,5,0" Background="LightGreen" 
+                                                Click="AcceptFriend_Click" Tag="{Binding}">
+                                            <TextBlock Text="✔" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Button>
+                                        <Button Width="24" Height="24" Background="IndianRed"
+                                                Click="RejectFriend_Click" Tag="{Binding}">
+                                            <TextBlock Text="✖" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Button>
+                                    </StackPanel>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
     </Grid>
 </UserControl>

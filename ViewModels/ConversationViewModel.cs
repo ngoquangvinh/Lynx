@@ -3,6 +3,7 @@ using LynxUI_Main.Services;
 using Microsoft.Win32;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
@@ -12,6 +13,8 @@ namespace LynxUI_Main.ViewModels
     public class ConversationViewModel : INotifyPropertyChanged
     {
         public ObservableCollection<MessageItem> Messages { get; set; } = new();
+        public ChatListItem SelectedChat { get; set; }
+        public int CurrentUserId { get; set; }
 
         private ChatListItem _activeChat;
         public ChatListItem ActiveChat
@@ -36,12 +39,24 @@ namespace LynxUI_Main.ViewModels
         }
 
         public ICommand SendCommand { get; }
+        private SignalRService _signalRService;
+        private readonly ApiService _apiService = new();
+        private readonly string _currentUserDisplayName;
+        private int _userId;
 
-        private readonly ChatService _chatService = new();
-
-        public ConversationViewModel()
+        public ConversationViewModel(int userId, SignalRService signalRService, string displayName)
         {
-            // Khi nút gửi được click hoặc nhấn Enter, gọi SendMessage
+            _userId = userId;
+            _signalRService = signalRService;
+            _currentUserDisplayName = displayName;
+            _signalRService.OnReceiveMessage += (message) =>
+            {
+                // Thêm tin nhắn nhận được vào Messages collection
+                App.Current.Dispatcher.Invoke(() => Messages.Add(message));
+            };
+
+
+            // Nhấn Enter, gọi SendMessage
             SendCommand = new RelayCommand(_ => SendMessage(), _ => !string.IsNullOrWhiteSpace(NewMessageText));
         }
 
@@ -49,7 +64,7 @@ namespace LynxUI_Main.ViewModels
         {
             if (chat == null) return;
 
-            var data = await _chatService.GetMessagesForChatAsync(chat.Id, chat.IsGroup);
+            var data = await _apiService.GetMessagesAsync(chat.Id, _userId);
 
             Messages.Clear();
             foreach (var msg in data)
@@ -60,27 +75,44 @@ namespace LynxUI_Main.ViewModels
             }
         }
 
-        public void SendMessage()
+        public async void SendMessage()
         {
             if (string.IsNullOrWhiteSpace(NewMessageText))
                 return;
 
+            if (ActiveChat == null || ActiveChat.Id == 0)
+            {
+                Debug.WriteLine("[Error] ActiveChat is null or invalid");
+                return;
+            }
+
+            var avatar = ActiveChat.AvatarUrls?.FirstOrDefault()
+                ?? Path.Combine(AppContext.BaseDirectory, "Assets", "avatar_default.png");
+
+            // Lấy ReceiverId trong 1-1 chat
+            var receiverId = ActiveChat.UserIds?.FirstOrDefault(id => id != _userId) ?? 0;
+
             var message = new MessageItem
             {
-                SenderId = ActiveChat.CurrentUserId,
-                SenderName = "Bạn",
+                ChatId = ActiveChat.Id,
+                SenderId = _userId,
+                SenderName = _currentUserDisplayName,
+                ReceiverId = receiverId,
                 Message = NewMessageText.Trim(),
+                AvatarUrl = avatar,
+                SenderAvatarUrl = avatar,
                 MessageStatus = "Sent",
-                TimeStamp = DateTime.Now.ToString("HH:mm"),
-                CurrentUserId = ActiveChat.CurrentUserId
+                TimeStamp = DateTime.Now,
+                CurrentUserId = _userId
             };
 
+            Debug.WriteLine($"[Debug] Sending message to ChatId = {message.ChatId}");
             AttachDownloadCommands(message);
             Messages.Add(message);
+            await _signalRService.SendMessageAsync(message);
             NewMessageText = string.Empty;
-
-            // TODO: gửi lên SignalR/server nếu cần
         }
+
 
         private void AttachDownloadCommands(MessageItem message)
         {
