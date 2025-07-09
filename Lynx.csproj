@@ -3,6 +3,7 @@
 	<PropertyGroup>
 		<OutputType>WinExe</OutputType>
 		<TargetFramework>net8.0-windows</TargetFramework>
+		<EnableWindowsTargeting>true</EnableWindowsTargeting>
 		<RootNamespace>LynxUI_Main</RootNamespace>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
