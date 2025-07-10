@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using LynxUI_Main.FormSetting;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -130,7 +131,9 @@ namespace LynxUI_Main.Custom_Controls
 
         private void Settings_MouseClick(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Settings!");
+            var frm = new FrmCaiDat();
+            frm.Owner = Window.GetWindow(this); // Đặt owner cho đẹp
+            frm.ShowDialog();
         }
 
     }

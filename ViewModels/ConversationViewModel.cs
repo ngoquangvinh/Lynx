@@ -170,6 +170,75 @@ namespace LynxUI_Main.ViewModels
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
             => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+
+        public async void SendImage(string imagePath)
+        {
+            if (string.IsNullOrWhiteSpace(imagePath) || !File.Exists(imagePath))
+                return;
+
+            if (ActiveChat == null || ActiveChat.Id == 0)
+                return;
+
+            var fileName = Path.GetFileName(imagePath);
+            var receiverId = ActiveChat.UserIds?.FirstOrDefault(id => id != _userId) ?? 0;
+            var avatar = ActiveChat.AvatarUrls?.FirstOrDefault()
+                ?? Path.Combine(AppContext.BaseDirectory, "Assets", "avatar_default.png");
+
+            var message = new MessageItem
+            {
+                ChatId = ActiveChat.Id,
+                SenderId = _userId,
+                SenderName = _currentUserDisplayName,
+                ReceiverId = receiverId,
+                Message = fileName,
+                FileName = fileName,
+                ImageSource = imagePath,
+                IsPicture = true,
+                MessageStatus = "Sent",
+                TimeStamp = DateTime.Now,
+                CurrentUserId = _userId,
+                AvatarUrl = avatar,
+                SenderAvatarUrl = avatar
+            };
+
+            AttachDownloadCommands(message);
+            Messages.Add(message);
+            await _signalRService.SendMessageAsync(message);
+        }
+        public async void SendFile(string filePath)
+        {
+            if (string.IsNullOrWhiteSpace(filePath) || !File.Exists(filePath))
+                return;
+
+            if (ActiveChat == null || ActiveChat.Id == 0)
+                return;
+
+            var fileName = Path.GetFileName(filePath);
+            var receiverId = ActiveChat.UserIds?.FirstOrDefault(id => id != _userId) ?? 0;
+            var avatar = ActiveChat.AvatarUrls?.FirstOrDefault()
+                ?? Path.Combine(AppContext.BaseDirectory, "Assets", "avatar_default.png");
+
+            var message = new MessageItem
+            {
+                ChatId = ActiveChat.Id,
+                SenderId = _userId,
+                SenderName = _currentUserDisplayName,
+                ReceiverId = receiverId,
+                Message = fileName,
+                FileName = fileName,
+                FileSource = filePath,
+                IsFile = true,
+                MessageStatus = "Sent",
+                TimeStamp = DateTime.Now,
+                CurrentUserId = _userId,
+                AvatarUrl = avatar,
+                SenderAvatarUrl = avatar
+            };
+
+            AttachDownloadCommands(message);
+            Messages.Add(message);
+            await _signalRService.SendMessageAsync(message);
+        }
     }
 
     public class RelayCommand : ICommand
@@ -193,15 +262,17 @@ namespace LynxUI_Main.ViewModels
         }
     }
 
-    /*public ChatListItem SelectedChatItem
-    {
-        get => _selectedChatItem;
-        set
+    
+
+        /*public ChatListItem SelectedChatItem
         {
-            _selectedChatItem = value;
-            OnPropertyChanged();
-            LoadMessagesForChat(value?.Id ?? 0); // nếu cần tải tin nhắn khi chọn
+            get => _selectedChatItem;
+            set
+            {
+                _selectedChatItem = value;
+                OnPropertyChanged();
+                LoadMessagesForChat(value?.Id ?? 0); // nếu cần tải tin nhắn khi chọn
+            }
         }
+        private ChatListItem _selectedChatItem;*/
     }
-    private ChatListItem _selectedChatItem;*/
-}
