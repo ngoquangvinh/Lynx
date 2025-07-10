@@ -212,7 +212,7 @@ namespace LynxUI_Main.Services
                 if (string.IsNullOrEmpty(token)) return null;
                 _httpClient.DefaultRequestHeaders.Authorization =
                     new AuthenticationHeaderValue("Bearer", token);
-                var response = await _httpClient.GetAsync($"{BASE_URL}/api/ChatList/{userId}");
+                var response = await _httpClient.GetAsync($"{BASE_URL}/api/chat/list/{userId}");
                 if (!response.IsSuccessStatusCode) return new();
 
                 var json = await response.Content.ReadAsStringAsync();
