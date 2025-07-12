@@ -93,6 +93,7 @@ namespace LynxUI_Main.Helpers
             {
                 apiMsg.MessageType = "file";
                 apiMsg.FileUrl = item.FileSource ?? "";
+                apiMsg.FileName = item.FileName ?? item.Message ?? "";
             }
             else if (item.IsSticker)
             {

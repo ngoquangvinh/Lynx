@@ -7,6 +7,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.CompilerServices;
+using System.Text.Json.Serialization;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -15,21 +16,73 @@ namespace LynxUI_Main.ViewModels
 {
     public class ChatListItem : INotifyPropertyChanged
     {
+        [JsonPropertyName("chatId")]
         public int Id { get; set; }
         public string DisplayName { get; set; }
-        public string LastMessage { get; set; }
+        private string _lastMessage;
+        public string LastMessage
+        {
+            get => _lastMessage;
+            set
+            {
+                _lastMessage = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(FormattedLastMessage));
+            }
+        }
         public DateTime? LastMessageTime { get; set; }
         public bool IsOnline { get; set; }
         public bool IsChatSelected { get; set; }
         public bool IsGroup { get; set; }
         public bool IsDelete { get; set; }
+        private string _fileName;
+        public string FileName
+        {
+            get => _fileName;
+            set
+            {
+                _fileName = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(FormattedLastMessage));
+            }
+        }
 
         public ObservableCollection<string> AvatarUrls { get; set; } = new();
         public ObservableCollection<int> UserIds { get; set; } = new ObservableCollection<int>();
 
-        public int LastSenderId { get; set; }
-        public string LastSenderName { get; set; }
-        public string LastMessageType { get; set; } = "text";
+        private int _lastSenderId;
+        public int LastSenderId
+        {
+            get => _lastSenderId;
+            set
+            {
+                _lastSenderId = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(FormattedLastMessage));
+            }
+        }
+        private string _lastSenderName;
+        public string LastSenderName
+        {
+            get => _lastSenderName;
+            set
+            {
+                _lastSenderName = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(FormattedLastMessage));
+            }
+        }
+        private string _lastMessageType;
+        public string LastMessageType
+        {
+            get => _lastMessageType;
+            set
+            {
+                _lastMessageType = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(FormattedLastMessage));
+            }
+        }
         public int CurrentUserId { get; set; }
 
         public ImageSource AvatarImage
@@ -83,6 +136,7 @@ namespace LynxUI_Main.ViewModels
             }
         }
 
+
         private string NormalizePath(string raw)
         {
             if (string.IsNullOrWhiteSpace(raw))
@@ -114,6 +168,11 @@ namespace LynxUI_Main.ViewModels
                 : Path.GetFullPath(raw);
         }
 
+        public void RaiseFormattedLastMessageChanged()
+        {
+            OnPropertyChanged(nameof(FormattedLastMessage));
+        }
+
         public string FormattedLastMessage
         {
             get
@@ -124,7 +183,10 @@ namespace LynxUI_Main.ViewModels
 
                 if (IsGroup)
                 {
-                    prefix = (LastSenderId == CurrentUserId) ? "Bạn: " : $"{LastSenderName}: ";
+                    if (LastSenderId == CurrentUserId)
+                        prefix = "Bạn: ";
+                    else
+                        prefix = !string.IsNullOrWhiteSpace(LastSenderName) ? $"{LastSenderName}: " : "(Không rõ): ";
                 }
                 else
                 {
@@ -139,10 +201,14 @@ namespace LynxUI_Main.ViewModels
                     "video" => prefix + "{video}",
                     "sticker" => prefix + "Sticker",
                     "emoji" => prefix + LastMessage,
-                    _ => prefix + LastMessage
+                    "file" => prefix + (!string.IsNullOrWhiteSpace(FileName) ? FileName : "{file}"),
+                    "audio" => prefix + "{âm thanh}",
+                    _ => prefix + (LastMessage ?? "")
                 };
+
             }
         }
+
 
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged([CallerMemberName] string name = null) =>
@@ -210,31 +276,41 @@ namespace LynxUI_Main.ViewModels
 
         public async Task LoadChatsAsync()
         {
+            Debug.WriteLine("[LoadChatsAsync] Đang tải danh sách cuộc trò chuyện...");
             var service = new ApiService();
             var chatItems = await service.GetChatListAsync(CurrentUserId);
             var allMessages = new Dictionary<int, List<MessageItem>>();
+            Debug.WriteLine($"[LoadChatsAsync] Số lượng chat lấy được từ API: {chatItems.Count}");
 
             foreach (var chat in chatItems)
             {
+                chat.CurrentUserId = CurrentUserId;
+
                 var messages = await service.GetMessagesAsync(chat.Id, CurrentUserId);
+                messages = messages.OrderBy(m => m.TimeStamp).ToList();
+                Debug.WriteLine($"[LoadChatsAsync] ChatId={chat.Id}, Số tin nhắn: {messages.Count}");
                 allMessages[chat.Id] = messages;
+
             }
 
-            // Đồng bộ last message info
+            // Đồng bộ lại LastMessage
             ChatMessageHelper.UpdateChatListItemFromMessages(chatItems, allMessages);
 
-            _allChats = chatItems.ToList();
+            _allChats = chatItems;
             FilterChats();
         }
 
+
         private void FilterChats()
         {
+            Debug.WriteLine($"[FilterChats] SearchTerm: {SearchTerm}");
             Chats.Clear();
             foreach (var chat in _allChats)
             {
                 if (string.IsNullOrWhiteSpace(SearchTerm) || chat.DisplayName.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase))
                 {
                     Chats.Add(chat);
+                    Debug.WriteLine($"[FilterChats] Đã thêm chat: {chat.DisplayName}");
                 }
             }
         }
@@ -355,6 +431,18 @@ namespace LynxUI_Main.ViewModels
             System.Diagnostics.Debug.WriteLine("[👥] CreateGroupCommand clicked.");
         }
 
+        public async void ShowChatTab()
+        {
+            IsFriendTabVisible = false;
+            IsChatTabVisible = true;
+
+            if (_allChats == null || !_allChats.Any())
+                await LoadChatsAsync();
+        }
+        public void ShowFriendTab()
+        {
+            IsChatTabVisible = false;
+        }
 
         public event PropertyChangedEventHandler PropertyChanged = null!;
         private void OnPropertyChanged([CallerMemberName] string prop = "") =>

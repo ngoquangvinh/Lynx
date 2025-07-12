@@ -76,6 +76,10 @@ namespace LynxUI_Main
         {
             _mainViewModel.ChatListVM.IsFriendTabVisible = false;
             _mainViewModel.ChatListVM.IsChatTabVisible = true;
+            if (_mainViewModel.ChatListVM.Chats == null || !_mainViewModel.ChatListVM.Chats.Any())
+            {
+                _ = _mainViewModel.ChatListVM.LoadChatsAsync();
+            }
         }
     }
 }

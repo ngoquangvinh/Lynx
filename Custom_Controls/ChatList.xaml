@@ -114,16 +114,18 @@
         <Border Grid.Row="1" Height="1" Background="#DDD" Margin="10,0,10,5" />
 
         <Grid Grid.Row="2">
-            <ListBox x:Name="ChatListBox" 
-                     Style="{StaticResource ChatListBoxStyle}"
-                     ItemsSource="{Binding Chats}"
-                     SelectedItem="{Binding SelectedChat, Mode=TwoWay}"
-                     ScrollViewer.VerticalScrollBarVisibility="Hidden"
-                     ScrollViewer.CanContentScroll="True"
-                     ScrollViewer.IsDeferredScrollingEnabled="False"
-                     ScrollViewer.PanningMode="VerticalOnly"
-                     PreviewMouseWheel="ChatListBox_PreviewMouseWheel"
-                     Background="Transparent">
+            <!-- CHAT LIST -->
+            <ListBox x:Name="ChatListBox"
+             Style="{StaticResource ChatListBoxStyle}"
+             ItemsSource="{Binding Chats}"
+             SelectedItem="{Binding SelectedChat, Mode=TwoWay}"
+             Visibility="{Binding IsChatTabVisible, Converter={StaticResource BoolToVisibilityConverter}}"
+             Background="Transparent"
+             ScrollViewer.VerticalScrollBarVisibility="Hidden"
+             ScrollViewer.CanContentScroll="True"
+             ScrollViewer.IsDeferredScrollingEnabled="False"
+             ScrollViewer.PanningMode="VerticalOnly"
+             PreviewMouseWheel="ChatListBox_PreviewMouseWheel">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <Grid Margin="10">
@@ -132,9 +134,9 @@
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
 
-                            <!-- Group Avatar -->
+                            <!-- GROUP AVATAR -->
                             <Grid Width="48" Height="48"
-                              Visibility="{Binding IsGroup, Converter={StaticResource BoolToVisibilityConverter}}">
+                          Visibility="{Binding IsGroup, Converter={StaticResource BoolToVisibilityConverter}}">
                                 <ItemsControl ItemsSource="{Binding AvatarSlots}" AlternationCount="10">
                                     <ItemsControl.ItemsPanel>
                                         <ItemsPanelTemplate>
@@ -144,10 +146,10 @@
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
                                             <Image Width="30" Height="30"
-                                               Source="{Binding AvatarImageSource, Converter={StaticResource SafeImagePathConverter}}"
-                                               Stretch="UniformToFill" ClipToBounds="True">
+                                           Source="{Binding AvatarImageSource, Converter={StaticResource SafeImagePathConverter}}"
+                                           Stretch="UniformToFill" ClipToBounds="True">
                                                 <Image.Clip>
-                                                    <EllipseGeometry Center="15,15" RadiusX="15" RadiusY="15" />
+                                                    <EllipseGeometry Center="15,15" RadiusX="15" RadiusY="15"/>
                                                 </Image.Clip>
                                             </Image>
                                         </DataTemplate>
@@ -158,7 +160,7 @@
                                                 <Setter.Value>
                                                     <MultiBinding Converter="{StaticResource GroupAvatarPositionConverter}" ConverterParameter="Left">
                                                         <Binding RelativeSource="{RelativeSource Self}" Path="(ItemsControl.AlternationIndex)"/>
-                                                        <Binding Path="DataContext.AvatarSlots.Count" RelativeSource="{RelativeSource AncestorType=ListBoxItem}" />
+                                                        <Binding Path="DataContext.AvatarSlots.Count" RelativeSource="{RelativeSource AncestorType=ListBoxItem}"/>
                                                     </MultiBinding>
                                                 </Setter.Value>
                                             </Setter>
@@ -166,7 +168,7 @@
                                                 <Setter.Value>
                                                     <MultiBinding Converter="{StaticResource GroupAvatarPositionConverter}" ConverterParameter="Top">
                                                         <Binding RelativeSource="{RelativeSource Self}" Path="(ItemsControl.AlternationIndex)"/>
-                                                        <Binding Path="DataContext.AvatarSlots.Count" RelativeSource="{RelativeSource AncestorType=ListBoxItem}" />
+                                                        <Binding Path="DataContext.AvatarSlots.Count" RelativeSource="{RelativeSource AncestorType=ListBoxItem}"/>
                                                     </MultiBinding>
                                                 </Setter.Value>
                                             </Setter>
@@ -175,77 +177,63 @@
                                 </ItemsControl>
                             </Grid>
 
-                            <!-- Personal Avatar -->
+                            <!-- PERSONAL AVATAR -->
                             <controls:RoundProfileButton Grid.Column="0" Width="40" Height="40"
-                            Visibility="{Binding IsGroup, Converter={StaticResource InvertedBoolToVisibilityConverter}}"
-                            ProfileImageSource="{Binding AvatarImageSource, Converter={StaticResource SafeImagePathConverter}}"
-                            IsOnline="{Binding IsOnline}" />
+                        Visibility="{Binding IsGroup, Converter={StaticResource InvertedBoolToVisibilityConverter}}"
+                        ProfileImageSource="{Binding AvatarImageSource, Converter={StaticResource SafeImagePathConverter}}"
+                        IsOnline="{Binding IsOnline}" />
 
-                            <!-- Name + Message -->
+                            <!-- MESSAGE INFO -->
                             <StackPanel Grid.Column="1" Margin="10,0,0,0">
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Grid.Column="0"
-                                           Text="{Binding DisplayName}"
-                                           FontWeight="Bold"
-                                           FontSize="16"
-                                           MaxWidth="200"
-                                           TextTrimming="CharacterEllipsis"
-                                           VerticalAlignment="Top"
-                                           HorizontalAlignment="Left"/>
+                                    <TextBlock Text="{Binding DisplayName}"
+                                       FontWeight="Bold" FontSize="16"
+                                       TextTrimming="CharacterEllipsis"
+                                       VerticalAlignment="Top"/>
                                     <TextBlock Grid.Column="1"
-                                           Text="{Binding LastMessageTime, Converter={StaticResource TimeAgoConverter}}"
-                                           FontSize="14"
-                                           Foreground="#B7B5B8"
-                                           Margin="10,0,0,0"
-                                           VerticalAlignment="Top"
-                                           HorizontalAlignment="Right"/>
+                                       Text="{Binding LastMessageTime, Converter={StaticResource TimeAgoConverter}}"
+                                       FontSize="14" Foreground="#B7B5B8"
+                                       VerticalAlignment="Top" HorizontalAlignment="Right" Margin="10,0,0,0"/>
                                 </Grid>
                                 <TextBlock Text="{Binding FormattedLastMessage}"
-                                       FontSize="13"
-                                       Foreground="Gray"
-                                       TextTrimming="CharacterEllipsis"
-                                       TextWrapping="NoWrap"
-                                       MaxWidth="200"
-                                       Margin="0,5,0,0"
-                                       HorizontalAlignment="Left" />
+                                   FontSize="13" Foreground="Gray"
+                                   TextTrimming="CharacterEllipsis"
+                                   TextWrapping="NoWrap" Margin="0,5,0,0"/>
                             </StackPanel>
                         </Grid>
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>
-            <ScrollViewer VerticalScrollBarVisibility="Hidden" BorderThickness="0,0,1,0">
+
+            <!-- FRIEND LIST + REQUESTS -->
+            <ScrollViewer VerticalScrollBarVisibility="Auto"
+                  Visibility="{Binding IsFriendTabVisible, Converter={StaticResource BoolToVisibilityConverter}}">
                 <StackPanel>
-                    <!-- Friend List -->
+                    <!-- FRIEND LIST -->
                     <ListBox x:Name="FriendListBox"
-                     Visibility="{Binding IsFriendTabVisible, Converter={StaticResource BoolToVisibilityConverter}}"
                      Style="{StaticResource ChatListBoxStyle}"
-                     ItemsSource="{Binding Friends}"                     
+                     ItemsSource="{Binding Friends}"
                      MouseDoubleClick="FriendsListBox_MouseDoubleClick"
-                     ScrollViewer.VerticalScrollBarVisibility="Hidden"
                      Background="Transparent">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <Grid Margin="10">
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto" />
-                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
-
-                                    <!-- Avatar -->
                                     <controls:RoundProfileButton Grid.Column="0" Width="40" Height="40"
-                                    ProfileImageSource="{Binding AvatarImageSource, Converter={StaticResource SafeImagePathConverter}}"
-                                    IsOnline="{Binding IsOnline}" />
-
-                                    <!-- Info -->
+                                ProfileImageSource="{Binding AvatarImageSource, Converter={StaticResource SafeImagePathConverter}}"
+                                IsOnline="{Binding IsOnline}" />
                                     <StackPanel Grid.Column="1" Margin="10,0">
-                                        <TextBlock Text="{Binding DisplayName}" FontWeight="Bold" FontSize="14" TextTrimming="CharacterEllipsis" />
+                                        <TextBlock Text="{Binding DisplayName}" FontWeight="Bold" FontSize="14" />
                                         <TextBlock>
-                                            <Run Text="ID: #" />
-                                            <Run Text="{Binding Id}" />
+                                    <Run Text="ID: #" />
+                                    <Run Text="{Binding Id}" />
                                         </TextBlock>
                                     </StackPanel>
                                 </Grid>
@@ -253,11 +241,11 @@
                         </ListBox.ItemTemplate>
                     </ListBox>
 
-                    <!-- Incoming Friend Requests -->
+                    <!-- INCOMING REQUESTS -->
                     <ListBox x:Name="IncomingRequestListBox"
-                     Visibility="{Binding IsFriendTabVisible, Converter={StaticResource BoolToVisibilityConverter}}"
-                     ItemsSource="{Binding IncomingRequests}" BorderThickness="0,0,1,0"
-                     Background="Transparent">
+                     ItemsSource="{Binding IncomingRequests}"
+                     Background="Transparent"
+                     BorderThickness="0,0,1,0">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <Grid Margin="10">
@@ -266,31 +254,24 @@
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
-
-                                    <!-- Avatar -->
-                                    <controls:RoundProfileButton Grid.Column="0"
-                                             Width="40" Height="40"
-                                             ProfileImageSource="{Binding AvatarImageSource, Converter={StaticResource SafeImagePathConverter}}"
-                                             IsOnline="{Binding IsOnline}" />
-
-                                    <!-- Info -->
+                                    <controls:RoundProfileButton Grid.Column="0" Width="40" Height="40"
+                                ProfileImageSource="{Binding AvatarImageSource, Converter={StaticResource SafeImagePathConverter}}"
+                                IsOnline="{Binding IsOnline}" />
                                     <StackPanel Grid.Column="1" Margin="10,0">
                                         <TextBlock Text="{Binding DisplayName}" FontWeight="Bold" FontSize="14"/>
                                         <TextBlock>
-                                            <Run Text="ID: #" />
-                                            <Run Text="{Binding Id}" />
+                                    <Run Text="ID: #" />
+                                    <Run Text="{Binding Id}" />
                                         </TextBlock>
                                     </StackPanel>
-
-                                    <!-- Accept/Reject -->
                                     <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
-                                        <Button Width="24" Height="24" Margin="0,0,5,0" Background="LightGreen" 
-                                                Click="AcceptFriend_Click" Tag="{Binding}">
-                                            <TextBlock Text="✔" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        <Button Width="24" Height="24" Margin="0,0,5,0" Background="LightGreen"
+                                        Click="AcceptFriend_Click" Tag="{Binding}">
+                                            <TextBlock Text="✔" FontSize="14"/>
                                         </Button>
                                         <Button Width="24" Height="24" Background="IndianRed"
-                                                Click="RejectFriend_Click" Tag="{Binding}">
-                                            <TextBlock Text="✖" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        Click="RejectFriend_Click" Tag="{Binding}">
+                                            <TextBlock Text="✖" FontSize="14"/>
                                         </Button>
                                     </StackPanel>
                                 </Grid>
@@ -300,5 +281,6 @@
                 </StackPanel>
             </ScrollViewer>
         </Grid>
+
     </Grid>
 </UserControl>

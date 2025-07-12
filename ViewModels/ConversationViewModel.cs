@@ -65,9 +65,9 @@ namespace LynxUI_Main.ViewModels
             if (chat == null) return;
 
             var data = await _apiService.GetMessagesAsync(chat.Id, _userId);
-
+            var sortedData = data.OrderBy(m => m.TimeStamp).ToList();
             Messages.Clear();
-            foreach (var msg in data)
+            foreach (var msg in sortedData)
             {
                 AttachDownloadCommands(msg);
                 CheckMissingContent(msg);
@@ -262,17 +262,17 @@ namespace LynxUI_Main.ViewModels
         }
     }
 
-    
 
-        /*public ChatListItem SelectedChatItem
+
+    /*public ChatListItem SelectedChatItem
+    {
+        get => _selectedChatItem;
+        set
         {
-            get => _selectedChatItem;
-            set
-            {
-                _selectedChatItem = value;
-                OnPropertyChanged();
-                LoadMessagesForChat(value?.Id ?? 0); // nếu cần tải tin nhắn khi chọn
-            }
+            _selectedChatItem = value;
+            OnPropertyChanged();
+            LoadMessagesForChat(value?.Id ?? 0); // nếu cần tải tin nhắn khi chọn
         }
-        private ChatListItem _selectedChatItem;*/
     }
+    private ChatListItem _selectedChatItem;*/
+}
