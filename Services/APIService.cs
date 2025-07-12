@@ -143,7 +143,11 @@ namespace LynxUI_Main.Services
                     new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
                 return apiMsgs?
-                    .Select(m => MessageMapper.MapFromApiMessage(m, currentUserId))
+                    .Select(m =>
+                    {
+                        Debug.WriteLine($"[API] MessageId={m.MessageId}, FileUrl={m.FileUrl}");
+                        return MessageMapper.MapFromApiMessage(m, currentUserId);
+                    })
                     .ToList() ?? new();
             }
             catch (Exception ex)
@@ -330,32 +334,24 @@ namespace LynxUI_Main.Services
             return (chatIdToken.Value<int>(), isNewToken.Value<bool>());
         }
 
-        public async Task<string?> UploadFileAsync(string filePath)
+        public async Task<string?> UploadFileAsync(string filePath, string type, int userId)
         {
-            try
-            {
-                var token = TokenStorage.LoadToken();
-                if (string.IsNullOrEmpty(token)) return null;
+            var token = TokenStorage.LoadToken();
+            if (string.IsNullOrEmpty(token)) return null;
 
-                using var content = new MultipartFormDataContent();
-                var fileBytes = await File.ReadAllBytesAsync(filePath);
-                var fileContent = new ByteArrayContent(fileBytes);
-                fileContent.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
-                content.Add(fileContent, "file", Path.GetFileName(filePath));
+            var fileName = Path.GetFileName(filePath);
+            using var content = new MultipartFormDataContent();
+            content.Add(new StreamContent(File.OpenRead(filePath)), "file", fileName);
 
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-                var response = await _httpClient.PostAsync($"{BASE_URL}/api/message/upload", content);
-                if (!response.IsSuccessStatusCode) return null;
+            _httpClient.DefaultRequestHeaders.Authorization =
+                new AuthenticationHeaderValue("Bearer", token);
 
-                var json = await response.Content.ReadAsStringAsync();
-                var doc = JsonDocument.Parse(json);
-                return doc.RootElement.GetProperty("fileUrl").GetString();
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"[UploadFileAsync] Error: {ex.Message}");
-                return null;
-            }
+            var response = await _httpClient.PostAsync($"{BASE_URL}/api/chat/upload?senderId={userId}&type={type}", content);
+            if (!response.IsSuccessStatusCode) return null;
+
+            var json = await response.Content.ReadAsStringAsync();
+            var doc = JsonDocument.Parse(json);
+            return doc.RootElement.GetProperty("fileUrl").GetString();
         }
 
     }

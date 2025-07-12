@@ -69,8 +69,8 @@
                                    Visibility="{Binding IsCorrupted, Converter={StaticResource BoolToVisibilityConverter}}"
                                    HorizontalAlignment="Center"/>
                                     <Viewbox MaxWidth="300" Margin="0,5">
-                                        <Image Source="{Binding ImageSource, Converter={StaticResource SafeImagePathConverter}}"
-                                   Stretch="Uniform"
+                                        <Image Source="{Binding FullImageUrl, Converter={StaticResource UrlToImageSourceConverter}}" 
+                                   Stretch="Uniform" ImageFailed="Image_ImageFailed"
                                    Visibility="{Binding IsCorrupted, Converter={StaticResource InvertedBoolToVisibilityConverter}}"/>
                                     </Viewbox>
                                 </Grid>
@@ -98,7 +98,7 @@
                                 <Grid Visibility="{Binding IsFile, Converter={StaticResource BoolToVisibilityConverter}}">
                                     <StackPanel Orientation="Horizontal" Margin="0,5"
                                     Visibility="{Binding IsCorrupted, Converter={StaticResource InvertedBoolToVisibilityConverter}}">
-                                        <TextBlock Text="{Binding FileName}" FontWeight="Bold" FontSize="14"/>
+                                        <TextBlock Text="{Binding FileName}" FontWeight="Bold" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" MaxWidth="200" FontSize="14"/>
                                         <TextBlock Text=" - " FontSize="14"/>
                                         <TextBlock Text="{Binding FileSize}" FontSize="14" Foreground="Gray"/>
                                         <Button Command="{Binding DownloadFileCommand}" Content="💾" Margin="5,0"/>
@@ -121,8 +121,11 @@
 
                         </Grid>
                     </Border>
-                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding TimeStamp}" FontSize="10" Foreground="Gray"
+                    <TextBlock Grid.Row="1" Grid.Column="1"
+                               Text="{Binding TimeStamp, StringFormat='{}{0:dd/MM/yyyy HH:mm:ss}'}"
+                               FontSize="10" Foreground="Gray"
                                Margin="5,2,0,0" HorizontalAlignment="Right"/>
+
                 </Grid>
             </Grid>
         </DataTemplate>
@@ -224,12 +227,12 @@
 
             <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="5">
                 <!-- Nút gửi hình -->
-                <Button Width="25" Height="25" Margin="5" Background="Transparent" BorderBrush="Transparent"
+                <Button Width="30" Height="30" Margin="0" Background="Transparent" BorderBrush="Transparent"
             ToolTip="Gửi hình" Click="BtnSendImage_Click">
                     <Image Source="/Assets/image_icon_1.png" RenderOptions.BitmapScalingMode="HighQuality"/>
                 </Button>
                 <!-- Nút gửi file -->
-                <Button Width="25" Height="25" Margin="5" Background="Transparent" BorderBrush="Transparent"
+                <Button Width="30" Height="30" Margin="0" Background="Transparent" BorderBrush="Transparent"
             ToolTip="Gửi file" Click="BtnSendFile_Click">
                     <Image Source="/Assets/attachment.png" RenderOptions.BitmapScalingMode="HighQuality"/>
                 </Button>

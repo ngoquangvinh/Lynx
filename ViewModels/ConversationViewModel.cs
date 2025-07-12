@@ -179,6 +179,12 @@ namespace LynxUI_Main.ViewModels
             if (ActiveChat == null || ActiveChat.Id == 0)
                 return;
 
+            string? uploadedUrl = await _apiService.UploadFileAsync(imagePath, "image", _userId);
+            if (string.IsNullOrEmpty(uploadedUrl))
+            {
+                Debug.WriteLine("[SendImage] Upload failed.");
+                return;
+            }
             var fileName = Path.GetFileName(imagePath);
             var receiverId = ActiveChat.UserIds?.FirstOrDefault(id => id != _userId) ?? 0;
             var avatar = ActiveChat.AvatarUrls?.FirstOrDefault()
@@ -192,7 +198,8 @@ namespace LynxUI_Main.ViewModels
                 ReceiverId = receiverId,
                 Message = fileName,
                 FileName = fileName,
-                ImageSource = imagePath,
+                ImageSource = uploadedUrl,
+                FileUrl = uploadedUrl,
                 IsPicture = true,
                 MessageStatus = "Sent",
                 TimeStamp = DateTime.Now,
@@ -213,6 +220,12 @@ namespace LynxUI_Main.ViewModels
             if (ActiveChat == null || ActiveChat.Id == 0)
                 return;
 
+            var uploadedUrl = await _apiService.UploadFileAsync(filePath, "file", _userId);
+            if (string.IsNullOrEmpty(uploadedUrl))
+            {
+                Debug.WriteLine("[SendFile] Upload failed.");
+                return;
+            }
             var fileName = Path.GetFileName(filePath);
             var receiverId = ActiveChat.UserIds?.FirstOrDefault(id => id != _userId) ?? 0;
             var avatar = ActiveChat.AvatarUrls?.FirstOrDefault()
@@ -226,7 +239,8 @@ namespace LynxUI_Main.ViewModels
                 ReceiverId = receiverId,
                 Message = fileName,
                 FileName = fileName,
-                FileSource = filePath,
+                FileSource = uploadedUrl,
+                FileUrl = uploadedUrl,
                 IsFile = true,
                 MessageStatus = "Sent",
                 TimeStamp = DateTime.Now,

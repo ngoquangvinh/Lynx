@@ -2,10 +2,12 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:LynxUI_Main" 
+             xmlns:converter="clr-namespace:LynxUI_Main.Converters"
              xmlns:vm="clr-namespace:LynxUI_Main.ViewModels">
     <!--StartupUri="MainWindow.xaml"> -->  <!-- StartupUri="ViewLogin/LoginWindow.xaml" -->
 
    <Application.Resources>
+       <converter:UrlToImageSourceConverter x:Key="UrlToImageSourceConverter" />
 
        <SolidColorBrush x:Key="Button.Static.Background" Color="#F54A4A"/>
        <SolidColorBrush x:Key="Button.Static.Border" Color="#FF707070"/>

@@ -33,7 +33,7 @@ namespace LynxUI_Main.Models
         public string FileName { get; set; }
         public string FileSource { get; set; }
         public string FileSize { get; set; }
-
+        public string FileUrl { get; set; }
         public bool IsSticker { get; set; }
         public string StickerSource { get; set; }
 
@@ -56,6 +56,20 @@ namespace LynxUI_Main.Models
                 return ImageHelper.GetAvatarImage(path);
             }
         }
+        public string FullImageUrl
+        {
+            get
+            {
+                Debug.WriteLine($"[DEBUG] FileUrl = {FileUrl}");
+                var finalUrl = string.IsNullOrEmpty(FileUrl) ? null :
+                    (Uri.IsWellFormedUriString(FileUrl, UriKind.Absolute) ? FileUrl : $"http://203.162.54.169:2090{FileUrl}");
+
+                Debug.WriteLine($"[DEBUG] FullImageUrl = {finalUrl}");
+                return finalUrl;
+            }
+        }
+
+
         public bool IsTextMessage => !IsDelete && !IsPicture && !IsVideo && !IsAudio && !IsFile && !IsSticker && !IsEmoji;
 
         public ICommand DownloadImageCommand { get; set; }

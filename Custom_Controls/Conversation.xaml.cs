@@ -1,5 +1,6 @@
 ﻿using LynxUI_Main.ViewModels;
 using Microsoft.Win32;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -97,6 +98,12 @@ namespace LynxUI_Main.Custom_Controls
                 }
             }
         }
+
+        private void Image_ImageFailed(object sender, ExceptionRoutedEventArgs e)
+        {
+            Debug.WriteLine("[ERROR] Image failed to load: " + e.ErrorException?.Message);
+        }
+
     }
 }
 

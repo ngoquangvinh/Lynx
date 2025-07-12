@@ -1,4 +1,5 @@
 ﻿using LynxUI_Main.Models;
+using System.IO;
 
 namespace LynxUI_Main.Helpers
 {
@@ -19,6 +20,7 @@ namespace LynxUI_Main.Helpers
                 Message = apiMsg.MessageText,
                 FileName = apiMsg.FileName,
                 FileSize = apiMsg.FileSize,
+                FileUrl = apiMsg.FileUrl,
                 MessageStatus = apiMsg.Status
             };
 
@@ -41,6 +43,7 @@ namespace LynxUI_Main.Helpers
                 case "file":
                     item.IsFile = true;
                     item.FileSource = apiMsg.FileUrl;
+                    item.FileName = apiMsg.FileName ?? Path.GetFileName(apiMsg.FileUrl);
                     break;
                 case "emoji":
                     item.IsEmoji = true;
@@ -83,17 +86,20 @@ namespace LynxUI_Main.Helpers
             {
                 apiMsg.MessageType = "image";
                 apiMsg.FileUrl = item.ImageSource ?? "";
+                apiMsg.FileUrl = item.FileUrl ?? item.ImageSource ?? "";
             }
             else if (item.IsVideo)
             {
                 apiMsg.MessageType = "video";
                 apiMsg.FileUrl = item.VideoSource ?? "";
+                apiMsg.FileUrl = item.FileUrl;
             }
             else if (item.IsFile)
             {
                 apiMsg.MessageType = "file";
                 apiMsg.FileUrl = item.FileSource ?? "";
                 apiMsg.FileName = item.FileName ?? item.Message ?? "";
+                apiMsg.FileUrl = item.FileUrl;
             }
             else if (item.IsSticker)
             {
