@@ -202,7 +202,8 @@
                                 <TextBlock Text="{Binding FormattedLastMessage}"
                                    FontSize="13" Foreground="Gray"
                                    TextTrimming="CharacterEllipsis"
-                                   TextWrapping="NoWrap" Margin="0,5,0,0"/>
+                                   TextWrapping="NoWrap" MaxWidth="305"
+                                   Margin="0,5,0,0"/>
                             </StackPanel>
                         </Grid>
                     </DataTemplate>
@@ -245,7 +246,7 @@
                     <ListBox x:Name="IncomingRequestListBox"
                      ItemsSource="{Binding IncomingRequests}"
                      Background="Transparent"
-                     BorderThickness="0,0,1,0">
+                     BorderThickness="0,0,0,0">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <Grid Margin="10">

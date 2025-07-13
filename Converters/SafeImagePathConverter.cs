@@ -25,18 +25,27 @@ namespace LynxUI_Main.Converters
 
                 Debug.WriteLine($"[Debug] Try load: {path}");
 
+                // Nếu là URL đầy đủ
                 if (Uri.IsWellFormedUriString(path, UriKind.Absolute))
                 {
                     Uri uri = new Uri(path, UriKind.Absolute);
                     return LoadImage(uri);
                 }
 
-                if (path.StartsWith("/Assets/", StringComparison.OrdinalIgnoreCase) || path.StartsWith("Assets/", StringComparison.OrdinalIgnoreCase))
+                // Nếu là đường dẫn từ server (bắt đầu bằng "/")
+                if (path.StartsWith("/") && !path.StartsWith("/Assets/", StringComparison.OrdinalIgnoreCase))
+                {
+                    string fullUrl = $"http://203.162.54.169:2090{path}";
+                    Debug.WriteLine($"[Resolved Server Path] → {fullUrl}");
+                    return LoadImage(new Uri(fullUrl, UriKind.Absolute));
+                }
+
+                // Nếu là ảnh trong thư mục Assets nội bộ
+                if (path.StartsWith("Assets/", StringComparison.OrdinalIgnoreCase) || path.StartsWith("/Assets/", StringComparison.OrdinalIgnoreCase))
                 {
                     string relativePath = path.TrimStart('/').Replace('/', Path.DirectorySeparatorChar);
                     string fullPath = Path.Combine(AppContext.BaseDirectory, relativePath);
                     Debug.WriteLine($"[ResolvedPath] Asset → {fullPath}");
-
                     return LoadImageFromFile(fullPath);
                 }
 
@@ -50,6 +59,7 @@ namespace LynxUI_Main.Converters
                 return LoadFallback("[Exception]");
             }
         }
+
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) =>
             throw new NotImplementedException();
