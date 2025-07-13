@@ -1,4 +1,6 @@
 ﻿using LynxUI_Main.ViewModels;
+using Microsoft.Win32;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -63,5 +65,46 @@ namespace LynxUI_Main.Custom_Controls
                 e.Handled = true; // Ngăn Enter xuống dòng
             }
         }
+        private void BtnSendImage_Click(object sender, RoutedEventArgs e)
+        {
+            var dlg = new OpenFileDialog
+            {
+                Filter = "Image Files|*.jpg;*.jpeg;*.png;*.bmp;*.gif",
+                Multiselect = false
+            };
+            if (dlg.ShowDialog() == true)
+            {
+                // Gọi ViewModel để gửi ảnh
+                if (DataContext is ConversationViewModel vm)
+                {
+                    vm.SendImage(dlg.FileName);
+                }
+            }
+        }
+
+        private void BtnSendFile_Click(object sender, RoutedEventArgs e)
+        {
+            var dlg = new OpenFileDialog
+            {
+                Filter = "All Files|*.*",
+                Multiselect = false
+            };
+            if (dlg.ShowDialog() == true)
+            {
+                // Gọi ViewModel để gửi file
+                if (DataContext is ConversationViewModel vm)
+                {
+                    vm.SendFile(dlg.FileName);
+                }
+            }
+        }
+
+        private void Image_ImageFailed(object sender, ExceptionRoutedEventArgs e)
+        {
+            Debug.WriteLine("[ERROR] Image failed to load: " + e.ErrorException?.Message);
+        }
+
     }
 }
+
+

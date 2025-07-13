@@ -65,9 +65,9 @@ namespace LynxUI_Main.ViewModels
             if (chat == null) return;
 
             var data = await _apiService.GetMessagesAsync(chat.Id, _userId);
-
+            var sortedData = data.OrderBy(m => m.TimeStamp).ToList();
             Messages.Clear();
-            foreach (var msg in data)
+            foreach (var msg in sortedData)
             {
                 AttachDownloadCommands(msg);
                 CheckMissingContent(msg);
@@ -170,6 +170,89 @@ namespace LynxUI_Main.ViewModels
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
             => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+
+        public async void SendImage(string imagePath)
+        {
+            if (string.IsNullOrWhiteSpace(imagePath) || !File.Exists(imagePath))
+                return;
+
+            if (ActiveChat == null || ActiveChat.Id == 0)
+                return;
+
+            string? uploadedUrl = await _apiService.UploadFileAsync(imagePath, "image", _userId);
+            if (string.IsNullOrEmpty(uploadedUrl))
+            {
+                Debug.WriteLine("[SendImage] Upload failed.");
+                return;
+            }
+            var fileName = Path.GetFileName(imagePath);
+            var receiverId = ActiveChat.UserIds?.FirstOrDefault(id => id != _userId) ?? 0;
+            var avatar = ActiveChat.AvatarUrls?.FirstOrDefault()
+                ?? Path.Combine(AppContext.BaseDirectory, "Assets", "avatar_default.png");
+
+            var message = new MessageItem
+            {
+                ChatId = ActiveChat.Id,
+                SenderId = _userId,
+                SenderName = _currentUserDisplayName,
+                ReceiverId = receiverId,
+                Message = fileName,
+                FileName = fileName,
+                ImageSource = uploadedUrl,
+                FileUrl = uploadedUrl,
+                IsPicture = true,
+                MessageStatus = "Sent",
+                TimeStamp = DateTime.Now,
+                CurrentUserId = _userId,
+                AvatarUrl = avatar,
+                SenderAvatarUrl = avatar
+            };
+
+            AttachDownloadCommands(message);
+            Messages.Add(message);
+            await _signalRService.SendMessageAsync(message);
+        }
+        public async void SendFile(string filePath)
+        {
+            if (string.IsNullOrWhiteSpace(filePath) || !File.Exists(filePath))
+                return;
+
+            if (ActiveChat == null || ActiveChat.Id == 0)
+                return;
+
+            var uploadedUrl = await _apiService.UploadFileAsync(filePath, "file", _userId);
+            if (string.IsNullOrEmpty(uploadedUrl))
+            {
+                Debug.WriteLine("[SendFile] Upload failed.");
+                return;
+            }
+            var fileName = Path.GetFileName(filePath);
+            var receiverId = ActiveChat.UserIds?.FirstOrDefault(id => id != _userId) ?? 0;
+            var avatar = ActiveChat.AvatarUrls?.FirstOrDefault()
+                ?? Path.Combine(AppContext.BaseDirectory, "Assets", "avatar_default.png");
+
+            var message = new MessageItem
+            {
+                ChatId = ActiveChat.Id,
+                SenderId = _userId,
+                SenderName = _currentUserDisplayName,
+                ReceiverId = receiverId,
+                Message = fileName,
+                FileName = fileName,
+                FileSource = uploadedUrl,
+                FileUrl = uploadedUrl,
+                IsFile = true,
+                MessageStatus = "Sent",
+                TimeStamp = DateTime.Now,
+                CurrentUserId = _userId,
+                AvatarUrl = avatar,
+                SenderAvatarUrl = avatar
+            };
+
+            AttachDownloadCommands(message);
+            Messages.Add(message);
+            await _signalRService.SendMessageAsync(message);
+        }
     }
 
     public class RelayCommand : ICommand
@@ -192,6 +275,8 @@ namespace LynxUI_Main.ViewModels
             remove => CommandManager.RequerySuggested -= value;
         }
     }
+
+
 
     /*public ChatListItem SelectedChatItem
     {

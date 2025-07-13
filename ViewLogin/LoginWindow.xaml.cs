@@ -158,7 +158,7 @@ namespace LynxUI_Main.ViewLogin
 
         private bool IsValidPhone(string phone)
         {
-            return ulong.TryParse(phone, out _) && phone.Length >= 10 && phone.Length <= 11;
+            return ulong.TryParse(phone, out _) && phone.Length >= 10;
         }
 
 

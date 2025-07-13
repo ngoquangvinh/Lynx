@@ -4,6 +4,7 @@ using LynxUI_Main.ViewModels;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Diagnostics;
+using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
@@ -115,6 +116,21 @@ namespace LynxUI_Main.Services
                 MessageBox.Show("Yêu cầu thất bại: " + message);
         }
 
+        public async Task<bool> UpdateUserAsync(int userId, UserItemDto dto)
+        {
+            var token = TokenStorage.LoadToken();
+            if (string.IsNullOrEmpty(token)) return false;
+
+            _httpClient.DefaultRequestHeaders.Authorization =
+                new AuthenticationHeaderValue("Bearer", token);
+
+            var json = JsonSerializer.Serialize(dto);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.PutAsync($"{BASE_URL}/api/user/{userId}", content);
+            return response.IsSuccessStatusCode;
+        }
+
         public async Task<List<MessageItem>> GetMessagesAsync(int chatId, int currentUserId)
         {
             try
@@ -131,7 +147,11 @@ namespace LynxUI_Main.Services
                     new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
                 return apiMsgs?
-                    .Select(m => MessageMapper.MapFromApiMessage(m, currentUserId))
+                    .Select(m =>
+                    {
+                        Debug.WriteLine($"[API] MessageId={m.MessageId}, FileUrl={m.FileUrl}");
+                        return MessageMapper.MapFromApiMessage(m, currentUserId);
+                    })
                     .ToList() ?? new();
             }
             catch (Exception ex)
@@ -198,8 +218,6 @@ namespace LynxUI_Main.Services
             }
         }
 
-
-
         public async Task<int?> GetCurrentUserIdAsync()
         {
             try
@@ -235,7 +253,7 @@ namespace LynxUI_Main.Services
                 if (string.IsNullOrEmpty(token)) return null;
                 _httpClient.DefaultRequestHeaders.Authorization =
                     new AuthenticationHeaderValue("Bearer", token);
-                var response = await _httpClient.GetAsync($"{BASE_URL}/api/ChatList/{userId}");
+                var response = await _httpClient.GetAsync($"{BASE_URL}/api/chat/list/{userId}");
                 if (!response.IsSuccessStatusCode) return new();
 
                 var json = await response.Content.ReadAsStringAsync();
@@ -337,7 +355,5 @@ namespace LynxUI_Main.Services
 
             return (chatIdToken.Value<int>(), isNewToken.Value<bool>());
         }
-
-
     }
 }

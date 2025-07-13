@@ -1,5 +1,6 @@
 ﻿using LynxUI_Main.Models;
 using LynxUI_Main.ViewModels;
+using System.Diagnostics;
 
 namespace LynxUI_Main.Helpers
 {
@@ -17,13 +18,15 @@ namespace LynxUI_Main.Helpers
             chat.LastSenderName = lastMessage.SenderName;
             chat.LastMessageType = GetMessageType(lastMessage);
             chat.LastMessageTime = lastMessage.TimeStamp;
+
+            chat.RaiseFormattedLastMessageChanged();
         }
 
         public static void UpdateChatListItemFromMessages(List<ChatListItem> chatList, Dictionary<int, List<MessageItem>> allMessages)
         {
             foreach (var chat in chatList)
             {
-                // ✅ Bảo vệ truy cập Dictionary
+                // Bảo vệ truy cập Dictionary
                 if (!allMessages.TryGetValue(chat.Id, out var messages) || messages == null || messages.Count == 0)
                     continue;
 
@@ -31,11 +34,15 @@ namespace LynxUI_Main.Helpers
                 if (lastMsg == null)
                     continue;
 
+                Debug.WriteLine($"[Update] ChatId={chat.Id}, LastMsg={lastMsg.Message}");
                 chat.LastMessage = GetMessagePreview(lastMsg);
                 chat.LastMessageTime = lastMsg.TimeStamp;
                 chat.LastSenderId = lastMsg.SenderId;
                 chat.LastSenderName = lastMsg.SenderName;
                 chat.LastMessageType = GetMessageType(lastMsg);
+                chat.FileName = lastMsg.FileName;
+
+                chat.RaiseFormattedLastMessageChanged();
             }
         }
 
