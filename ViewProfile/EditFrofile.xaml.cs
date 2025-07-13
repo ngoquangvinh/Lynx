@@ -3,15 +3,15 @@ using LynxUI_Main.Services;
 using System;
 using System.Windows;
 
-namespace LynxUI_Main.ViewFrofile
+namespace LynxUI_Main.ViewProfile
 {
-    public partial class EditFrofile : Window
+    public partial class EditProfile : Window
     {
         private readonly ApiService _apiService = new ApiService();
         private readonly int _userId;
         private readonly string _avatarUrl;
         private readonly string _username;
-        public EditFrofile(UserItem user, int userId)
+        public EditProfile(UserItem user, int userId)
         {
             InitializeComponent();
 

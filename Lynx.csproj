@@ -41,8 +41,6 @@
 	  <None Remove="Assets\wallpaperflare.com_wallpaper.jpg" />
 	  <None Remove="Assets\_242_by_simpli58_dh4rdp4-414w-2x.jpg" />
 	  <None Remove="Assets\_6b491681-765f-48e3-9f73-c5eb552ecb31.jpg" />
-	  <None Remove="ViewFrofile\img\avatar.jpg" />
-	  <None Remove="ViewFrofile\img\camera.png" />
 	  <None Remove="ViewLogin\Img\123.png" />
 	  <None Remove="ViewLogin\Img\fen.png" />
 	  <None Remove="ViewLogin\Img\login.png" />
@@ -173,8 +171,8 @@
 		<Resource Include="Assets\uit.png" />
 		<Resource Include="Assets\videocall.png" />
 		<Resource Include="Assets\wink.png" />
-		<Resource Include="ViewFrofile\img\avatar.jpg" />
-		<Resource Include="ViewFrofile\img\camera.png" />
+		<Resource Include="ViewProfile\img\avatar.jpg" />
+		<Resource Include="ViewProfile\img\camera.png" />
 		<Resource Include="ViewLogin\Img\123.png">
 		  <CopyToOutputDirectory>Never</CopyToOutputDirectory>
 		</Resource>

@@ -1,10 +1,10 @@
 ﻿using LynxUI_Main.Helpers;
 using LynxUI_Main.Services;
 using LynxUI_Main.ViewModels;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
-using System.IO;
 
 namespace LynxUI_Main
 {
@@ -89,7 +89,7 @@ namespace LynxUI_Main
         }
         private void ProfileButton_Click(object sender, RoutedEventArgs e)
         {
-            var profileWindow = new ViewFrofile.Frofile();
+            var profileWindow = new ViewProfile.Profile();
             profileWindow.Owner = this; // Gắn cửa sổ cha (tùy chọn)
             profileWindow.ShowDialog(); // hoặc Show() nếu muốn không chặn
         }

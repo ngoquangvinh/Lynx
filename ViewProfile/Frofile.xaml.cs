@@ -6,15 +6,15 @@ using System.Windows.Media.Imaging;
 using System.Windows.Media;
 using System.IO;
 
-namespace LynxUI_Main.ViewFrofile
+namespace LynxUI_Main.ViewProfile
 {
-    public partial class Frofile : Window
+    public partial class Profile : Window
     {
         private readonly ApiService _apiService = new ApiService();
         private UserItem? _currentUser;
         private string? _uploadedAvatarUrl = null;
 
-        public Frofile()
+        public Profile()
         {
             InitializeComponent();
             LoadProfileAsync();
@@ -172,7 +172,7 @@ namespace LynxUI_Main.ViewFrofile
             if (_currentUser != null)
             {
                 this.Hide();
-                var editWindow = new EditFrofile(_currentUser, _currentUser.Id);
+                var editWindow = new EditProfile(_currentUser, _currentUser.Id);
                 var result = editWindow.ShowDialog();
 
                 if (result == true)
