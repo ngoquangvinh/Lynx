@@ -40,7 +40,13 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <Custom_Controls:RoundProfileButton Width="50" ProfileImageSource="/assets/profile1.jpg" IsOnline="True" StrokeBrush="#2a2e4d"/>
+            <Custom_Controls:RoundProfileButton
+    Width="50"
+    ProfileImageSource="/assets/profile1.jpg"
+    IsOnline="True"
+    StrokeBrush="#2a2e4d"
+    Click="ProfileButton_Click"/>
+
             <Custom_Controls:MenuListControl x:Name="MenuListControl" Grid.Row="1" Margin="0,50,0,0"/>
         </Grid>
 

@@ -77,5 +77,13 @@ namespace LynxUI_Main
             _mainViewModel.ChatListVM.IsFriendTabVisible = false;
             _mainViewModel.ChatListVM.IsChatTabVisible = true;
         }
+        private void ProfileButton_Click(object sender, RoutedEventArgs e)
+        {
+            var profileWindow = new ViewFrofile.Frofile();
+            profileWindow.Owner = this; // Gắn cửa sổ cha (tùy chọn)
+            profileWindow.ShowDialog(); // hoặc Show() nếu muốn không chặn
+        }
+
+
     }
 }

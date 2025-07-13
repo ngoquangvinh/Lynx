@@ -16,6 +16,15 @@ namespace LynxUI_Main.Models
         public string AvatarUrl { get; set; }
         [JsonPropertyName("isOnline")]
         public bool IsOnline { get; set; }
+        [JsonPropertyName("email")]
+        public string Email { get; set; }  // ✅ Thêm
+
+        [JsonPropertyName("phoneNumber")]
+        public string PhoneNumber { get; set; }  // ✅ Thêm
+
+        [JsonPropertyName("birthday")]
+        public DateTime? Birthday { get; set; }  // ✅ Thêm
+
         public ImageSource AvatarImage =>
         ImageHelper.GetAvatarImage(string.IsNullOrEmpty(AvatarUrl)
             ? "Assets/avatar_default.png"

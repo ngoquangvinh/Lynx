@@ -10,6 +10,10 @@ using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using System.Windows;
+using System.IO;
+using System.Net.Http;
+using System.Net.Http.Headers;
+
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
 
@@ -152,21 +156,39 @@ namespace LynxUI_Main.Services
                     return null;
 
                 var json = await response.Content.ReadAsStringAsync();
-
-                // Log để kiểm tra dữ liệu JSON
                 Debug.WriteLine($"[API Response JSON] {json}");
 
-                // Parse thủ công vì không dùng JsonPropertyName
                 using var doc = JsonDocument.Parse(json);
                 var root = doc.RootElement;
+
+                string? avatarRaw = null;
+                if (root.TryGetProperty("avatarUrl", out var avatarProp))
+                {
+                    avatarRaw = avatarProp.GetString();
+
+                    // Nếu không phải đường dẫn hợp lệ → reset về null để dùng fallback avatar
+                    if (string.IsNullOrWhiteSpace(avatarRaw) ||
+                        !Uri.IsWellFormedUriString(avatarRaw, UriKind.RelativeOrAbsolute))
+                    {
+                        avatarRaw = null;
+                    }
+                }
 
                 return new UserItem
                 {
                     Id = root.GetProperty("userId").GetInt32(),
                     DisplayName = root.GetProperty("userName").GetString(),
                     FullName = root.GetProperty("fullName").GetString(),
-                    AvatarUrl = root.GetProperty("avatarUrl").GetString(),
-                    IsOnline = root.GetProperty("isOnline").GetBoolean()
+                    AvatarUrl = avatarRaw ?? "/Assets/avatar_default.png",
+                    IsOnline = root.GetProperty("isOnline").GetBoolean(),
+
+                    Email = root.TryGetProperty("email", out var emailProp) ? emailProp.GetString() : "",
+                    PhoneNumber = root.TryGetProperty("phone", out var phoneProp) ? phoneProp.GetString() : "",
+                    Birthday = root.TryGetProperty("birthday", out var birthdayProp)
+                        && birthdayProp.ValueKind == JsonValueKind.String
+                        && DateTime.TryParse(birthdayProp.GetString(), out var bday)
+                            ? bday
+                            : null
                 };
             }
             catch (Exception ex)
@@ -175,6 +197,7 @@ namespace LynxUI_Main.Services
                 return null;
             }
         }
+
 
 
         public async Task<int?> GetCurrentUserIdAsync()
@@ -314,5 +337,7 @@ namespace LynxUI_Main.Services
 
             return (chatIdToken.Value<int>(), isNewToken.Value<bool>());
         }
+
+
     }
 }

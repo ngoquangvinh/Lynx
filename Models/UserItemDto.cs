@@ -10,6 +10,9 @@ namespace LynxUI_Main.Models
         public string FullName { get; set; }
         public string AvatarUrl { get; set; }
         public bool IsOnline { get; set; }
+        public string Email { get; set; }
+        public string PhoneNumber { get; set; }
+        public DateTime? Birthday { get; set; }
         public ImageSource AvatarImage =>
         ImageHelper.GetAvatarImage(string.IsNullOrEmpty(AvatarUrl)
             ? "Assets/avatar_default.png"

@@ -17,7 +17,11 @@ namespace LynxUI_Main.Helpers
                 DisplayName = dto.UserName,
                 FullName = dto.FullName,
                 AvatarUrl = dto.AvatarUrl,
-                IsOnline = dto.IsOnline
+                IsOnline = dto.IsOnline,
+                 // bổ sung:
+                Email = dto.Email,
+                PhoneNumber = dto.PhoneNumber,
+                Birthday = dto.Birthday
             };
         }
     }
