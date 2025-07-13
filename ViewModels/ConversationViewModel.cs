@@ -1,5 +1,6 @@
 ﻿using LynxUI_Main.Models;
 using LynxUI_Main.Services;
+using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Win32;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -12,9 +13,11 @@ namespace LynxUI_Main.ViewModels
 {
     public class ConversationViewModel : INotifyPropertyChanged
     {
-        public ObservableCollection<MessageItem> Messages { get; set; } = new();
+        public ObservableCollection<MessageItem> Messages { get; set; } = new ObservableCollection<MessageItem>();
         public ChatListItem SelectedChat { get; set; }
         public int CurrentUserId { get; set; }
+
+        private HubConnection _hubConnection;
 
         private ChatListItem _activeChat;
         public ChatListItem ActiveChat
@@ -276,7 +279,20 @@ namespace LynxUI_Main.ViewModels
         }
     }
 
-
+    /*public async Task StartListeningForMessagesAsync()
+        {
+            await _hubConnection.On<MessageDto>("ReceiveMessage", message =>
+            {
+                if (message.ChatId == ActiveChat.ChatId)
+                {
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        var item = MessageMapper.MapFromApiMessage(message, CurrentUserId);
+                        Messages.Add(item);
+                    });
+                }
+            });
+        }*/
 
     /*public ChatListItem SelectedChatItem
     {

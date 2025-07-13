@@ -1,6 +1,7 @@
 ﻿using LynxUI_Main.ViewModels;
 using Microsoft.Win32;
 using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
@@ -17,7 +18,7 @@ namespace LynxUI_Main.Custom_Controls
         public Conversation()
         {
             InitializeComponent();
-            this.Loaded += Conversation_Loaded;
+            this.DataContextChanged += Conversation_DataContextChanged;
         }
 
 
@@ -87,6 +88,19 @@ namespace LynxUI_Main.Custom_Controls
             ScrollToBottom();
         }
 
+        private void Conversation_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (e.NewValue is INotifyPropertyChanged newDC)
+            {
+                var messagesProp = newDC.GetType().GetProperty("Messages");
+                if (messagesProp?.GetValue(newDC) is INotifyCollectionChanged observable)
+                {
+                    observable.CollectionChanged += (s, ev) => ScrollToBottom();
+                }
+            }
+
+            ScrollToBottom();
+        }
         private void ScrollToBottom()
         {
             var scrollViewer = FindVisualChild<ScrollViewer>(this);
