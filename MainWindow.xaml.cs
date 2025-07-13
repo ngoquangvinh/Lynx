@@ -3,6 +3,8 @@ using LynxUI_Main.Services;
 using LynxUI_Main.ViewModels;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media.Imaging;
+using System.IO;
 
 namespace LynxUI_Main
 {
@@ -25,6 +27,10 @@ namespace LynxUI_Main
 
             ChatListControl.DataContext = _mainViewModel.ChatListVM;
             ConversationControl.DataContext = _mainViewModel.ConversationVM;
+
+            // ✅ Load avatar từ cache hoặc API
+            LoadProfileImageOnStartup();
+
             ConnectToSignalR();
         }
 
@@ -88,6 +94,70 @@ namespace LynxUI_Main
             profileWindow.ShowDialog(); // hoặc Show() nếu muốn không chặn
         }
 
+        public void UpdateProfileImage(string avatarUrl)
+        {
+            try
+            {
+                var imageUri = avatarUrl.StartsWith("http", StringComparison.OrdinalIgnoreCase)
+                    ? avatarUrl
+                    : $"http://203.162.54.169:2090{avatarUrl}?t={DateTime.Now.Ticks}"; // tránh cache
+
+                var image = new BitmapImage();
+                image.BeginInit();
+                image.UriSource = new Uri(imageUri, UriKind.Absolute);
+                image.CacheOption = BitmapCacheOption.OnLoad;
+                image.EndInit();
+
+                MyAvatarButton.ProfileImageSource = image;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Lỗi cập nhật avatar: " + ex.Message);
+            }
+        }
+
+        private async void LoadProfileImageOnStartup()
+        {
+            try
+            {
+                string? avatarUrl = null;
+
+                // Ưu tiên đọc từ cache nếu có
+                if (File.Exists("avatar.cache"))
+                {
+                    avatarUrl = File.ReadAllText("avatar.cache");
+                }
+                else
+                {
+                    // Nếu không có cache thì gọi API lấy avatar từ server
+                    var user = await new ApiService().GetUserByIdAsync(_userId);
+                    if (user != null && !string.IsNullOrEmpty(user.AvatarUrl))
+                    {
+                        avatarUrl = user.AvatarUrl;
+                        File.WriteAllText("avatar.cache", avatarUrl); // ✅ Cache lại
+                    }
+                }
+
+                if (!string.IsNullOrEmpty(avatarUrl))
+                {
+                    var fullUrl = avatarUrl.StartsWith("http", StringComparison.OrdinalIgnoreCase)
+                        ? avatarUrl
+                        : $"http://203.162.54.169:2090{avatarUrl}?t={DateTime.Now.Ticks}";
+
+                    var image = new BitmapImage();
+                    image.BeginInit();
+                    image.UriSource = new Uri(fullUrl, UriKind.Absolute);
+                    image.CacheOption = BitmapCacheOption.OnLoad;
+                    image.EndInit();
+
+                    MyAvatarButton.ProfileImageSource = image;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Lỗi load avatar khi khởi động: " + ex.Message);
+            }
+        }
 
     }
 }

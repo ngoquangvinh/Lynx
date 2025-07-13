@@ -1,33 +1,59 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using LynxUI_Main.Models;
+using LynxUI_Main.Services;
+using System;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace LynxUI_Main.ViewFrofile
 {
-    /// <summary>
-    /// Interaction logic for Window1.xaml
-    /// </summary>
     public partial class EditFrofile : Window
     {
-        public EditFrofile()
+        private readonly ApiService _apiService = new ApiService();
+        private readonly int _userId;
+        private readonly string _avatarUrl;
+        private readonly string _username;
+        public EditFrofile(UserItem user, int userId)
         {
             InitializeComponent();
-        }
-        private void SaveButton_Click(object sender, RoutedEventArgs e)
-        {
-            MessageBox.Show("Thông tin đã được lưu!");
-            this.Close(); // hoặc làm gì đó
+
+            _userId = userId;
+            _username = user.DisplayName; // hoặc user.UserName nếu có
+            _avatarUrl = string.IsNullOrEmpty(user.AvatarUrl)
+         ? "/Assets/avatar_default.png"
+         : user.AvatarUrl;
+
+            FullNameBox.Text = user.FullName;
+            EmailBox.Text = user.Email;
+            PhoneBox.Text = user.PhoneNumber;
+            if (user.Birthday.HasValue)
+            {
+                BirthdayPicker.SelectedDate = user.Birthday.Value;
+            }
         }
 
+        private async void SaveButton_Click(object sender, RoutedEventArgs e)
+        {
+            var dto = new UpdateUserDto
+            {
+                UserName = _username, // BẮT BUỘC
+                FullName = FullNameBox.Text.Trim(),
+                Email = EmailBox.Text.Trim(),
+                Phone = PhoneBox.Text.Trim(), // 🔁 Đổi từ PhoneNumber → Phone
+                Birthday = BirthdayPicker.SelectedDate,
+                AvatarUrl = _avatarUrl
+            };
+
+
+            var success = await _apiService.UpdateUserAsync(_userId, dto);
+            if (success)
+            {
+                MessageBox.Show("Cập nhật thành công!");
+                this.DialogResult = true;
+                this.Close();
+            }
+            else
+            {
+                MessageBox.Show("Cập nhật thất bại!");
+            }
+        }
     }
 }

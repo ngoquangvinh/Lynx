@@ -22,6 +22,7 @@
 	  <None Remove="Assets\AddGroup.png" />
 	  <None Remove="Assets\alderaan_by_kareguya_dh56ycn.jpg" />
 	  <None Remove="Assets\alone-pyramid-digital-art-4k-wallpaper.jpg" />
+	  <None Remove="Assets\avartar_profile.jpg" />
 	  <None Remove="Assets\avatar_default.png" />
 	  <None Remove="Assets\aw_alienfx_head_2560x1440_qhd_screenfill_2021.jpeg" />
 	  <None Remove="Assets\aw_hexagons_pink_head_1920x1080_hd_screenfill_2021.jpeg" />
@@ -67,6 +68,7 @@
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="Lynx-V2.ico" />
+	  <EmbeddedResource Include="Assets\avartar_profile.jpg" />
 	  <Resource Include="Assets\call_icon.png">
 	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
 	  </Resource>

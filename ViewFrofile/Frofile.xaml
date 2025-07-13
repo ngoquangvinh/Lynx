@@ -51,7 +51,11 @@
                        TextAlignment="Center" Margin="0,10,0,0" />
             <TextBlock x:Name="UsernameTextBlock" FontSize="14" Foreground="Gray"
                        TextAlignment="Center" Margin="0,0,0,20" />
-
+            <TextBlock x:Name="UserIdTextBlock"
+           FontSize="14"
+           Foreground="DarkGray"
+           TextAlignment="Center"
+           Margin="0,0,0,10" />
             <!-- Thông tin cá nhân -->
             <Border BorderBrush="#DDD" BorderThickness="1" CornerRadius="6">
                 <StackPanel>

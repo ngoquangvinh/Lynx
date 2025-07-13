@@ -41,8 +41,9 @@
             </Grid.RowDefinitions>
 
             <Custom_Controls:RoundProfileButton
+   x:Name="MyAvatarButton"
     Width="50"
-    ProfileImageSource="/assets/profile1.jpg"
+    ProfileImageSource="/assets/noimage.png"
     IsOnline="True"
     StrokeBrush="#2a2e4d"
     Click="ProfileButton_Click"/>

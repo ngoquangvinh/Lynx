@@ -11,6 +11,7 @@ namespace LynxUI_Main.Models
         [JsonPropertyName("displayName")]
         public string DisplayName { get; set; }
         [JsonPropertyName("fullName")]
+
         public string FullName { get; set; }
         [JsonPropertyName("avatarUrl")]
         public string AvatarUrl { get; set; }
@@ -24,6 +25,9 @@ namespace LynxUI_Main.Models
 
         [JsonPropertyName("birthday")]
         public DateTime? Birthday { get; set; }  // ✅ Thêm
+
+        [JsonPropertyName("userName")]
+        public string UserName { get; set; }
 
         public ImageSource AvatarImage =>
         ImageHelper.GetAvatarImage(string.IsNullOrEmpty(AvatarUrl)

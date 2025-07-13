@@ -116,7 +116,7 @@ namespace LynxUI_Main.Services
                 MessageBox.Show("Yêu cầu thất bại: " + message);
         }
 
-        public async Task<bool> UpdateUserAsync(int userId, UserItemDto dto)
+        public async Task<bool> UpdateUserAsync(int userId, UpdateUserDto dto)
         {
             var token = TokenStorage.LoadToken();
             if (string.IsNullOrEmpty(token)) return false;
@@ -128,7 +128,13 @@ namespace LynxUI_Main.Services
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
             var response = await _httpClient.PutAsync($"{BASE_URL}/api/user/{userId}", content);
-            return response.IsSuccessStatusCode;
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                Debug.WriteLine("[UpdateUserAsync] Lỗi: " + errorContent);
+                return false;
+            }
+            return true;
         }
 
         public async Task<List<MessageItem>> GetMessagesAsync(int chatId, int currentUserId)
@@ -354,6 +360,25 @@ namespace LynxUI_Main.Services
             }
 
             return (chatIdToken.Value<int>(), isNewToken.Value<bool>());
+        }
+        public async Task<string?> UploadFileAsync(string filePath, string type, int userId)
+        {
+            var token = TokenStorage.LoadToken();
+            if (string.IsNullOrEmpty(token)) return null;
+
+            var fileName = Path.GetFileName(filePath);
+            using var content = new MultipartFormDataContent();
+            content.Add(new StreamContent(File.OpenRead(filePath)), "file", fileName);
+
+            _httpClient.DefaultRequestHeaders.Authorization =
+                new AuthenticationHeaderValue("Bearer", token);
+
+            var response = await _httpClient.PostAsync($"{BASE_URL}/api/chat/upload?senderId={userId}&type={type}", content);
+            if (!response.IsSuccessStatusCode) return null;
+
+            var json = await response.Content.ReadAsStringAsync();
+            var doc = JsonDocument.Parse(json);
+            return doc.RootElement.GetProperty("fileUrl").GetString();
         }
     }
 }

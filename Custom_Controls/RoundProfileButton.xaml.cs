@@ -44,7 +44,11 @@ namespace LynxUI_Main.Custom_Controls
         }
 
         public static readonly DependencyProperty ProfileImageSourceProperty =
-            DependencyProperty.Register(nameof(ProfileImageSource), typeof(ImageSource), typeof(RoundProfileButton));
+            DependencyProperty.Register(
+                nameof(ProfileImageSource),
+                typeof(ImageSource),
+                typeof(RoundProfileButton),
+                new PropertyMetadata(null));
 
         public ImageSource ProfileImageSource
         {
