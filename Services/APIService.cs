@@ -361,6 +361,7 @@ namespace LynxUI_Main.Services
 
             return (chatIdToken.Value<int>(), isNewToken.Value<bool>());
         }
+
         public async Task<string?> UploadFileAsync(string filePath, string type, int userId)
         {
             var token = TokenStorage.LoadToken();
@@ -380,5 +381,6 @@ namespace LynxUI_Main.Services
             var doc = JsonDocument.Parse(json);
             return doc.RootElement.GetProperty("fileUrl").GetString();
         }
+
     }
 }
