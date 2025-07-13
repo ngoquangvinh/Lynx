@@ -1,6 +1,5 @@
 ﻿using LynxUI_Main.Models;
 using LynxUI_Main.Services;
-using System.IO;
 using System.Net.Mail;
 using System.Windows;
 using System.Windows.Input;
@@ -204,8 +203,6 @@ namespace LynxUI_Main.ViewLogin
                 return;
             }
 
-            string avatarUrl = "/Assets/avatar_default.png"; // fallback
-
             var Rmodel = new RegisterModel
             {
                 UserName = username,
@@ -213,7 +210,7 @@ namespace LynxUI_Main.ViewLogin
                 FullName = fullName,
                 Email = email,
                 Phone = phone,
-                AvatarUrl = avatarUrl,
+                AvatarUrl = "/Assets/avatar_default.png", // (lấy từ UI nếu có)
                 Birthday = birthday
             };
 
@@ -236,30 +233,13 @@ namespace LynxUI_Main.ViewLogin
             try
             {
                 var loginResult = await ApiService.LoginAsync(Lmodel);
+                var api = new ApiService();
+                var user = await api.GetUserByIdAsync(loginResult.UserId);
                 if (loginResult != null && loginResult.Success)
                 {
-                    var api = new ApiService();
-                    var userId = loginResult.UserId;
-
-                    // ✅ Gửi avatar mặc định sau khi đăng nhập
-                    var defaultAvatarPath = Path.Combine(AppContext.BaseDirectory, "Assets", "avatar_default.png");
-                    if (File.Exists(defaultAvatarPath))
-                    {
-                        var uploadedUrl = await api.UploadAvatarAsync(defaultAvatarPath, userId);
-                        if (!string.IsNullOrEmpty(uploadedUrl))
-                        {
-                            // Cập nhật avatarUrl vào database
-                            await api.UpdateUserAsync(userId, new UserItemDto
-                            {
-                                AvatarUrl = uploadedUrl
-                            });
-                        }
-                    }
-
-                    // ✅ Mở MainWindow
-                    var user = await api.GetUserByIdAsync(userId);
-                    LoggedInUserId = userId;
-                    var mainWindow = new LynxUI_Main.MainWindow(userId, user.DisplayName);
+                    LoggedInUserId = loginResult.UserId;
+                    // Open MainWindow and close LoginWindow  
+                    var mainWindow = new LynxUI_Main.MainWindow(LoggedInUserId ?? 0, user.DisplayName);
                     Application.Current.MainWindow = mainWindow;
                     mainWindow.Show();
                     this.Close();
