@@ -1,9 +1,11 @@
 ﻿using LynxUI_Main.ViewModels;
 using Microsoft.Win32;
+using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace LynxUI_Main.Custom_Controls
 {
@@ -15,6 +17,7 @@ namespace LynxUI_Main.Custom_Controls
         public Conversation()
         {
             InitializeComponent();
+            this.Loaded += Conversation_Loaded;
         }
 
 
@@ -65,6 +68,34 @@ namespace LynxUI_Main.Custom_Controls
                 e.Handled = true; // Ngăn Enter xuống dòng
             }
         }
+
+        private void Conversation_Loaded(object sender, RoutedEventArgs e)
+        {
+            var dc = this.DataContext;
+            if (dc != null)
+            {
+                var prop = dc.GetType().GetProperty("Messages");
+                if (prop != null && prop.GetValue(dc) is INotifyCollectionChanged observable)
+                {
+                    observable.CollectionChanged += (s, ev) =>
+                    {
+                        ScrollToBottom();
+                    };
+                }
+            }
+
+            ScrollToBottom();
+        }
+
+        private void ScrollToBottom()
+        {
+            var scrollViewer = FindVisualChild<ScrollViewer>(this);
+            if (scrollViewer != null)
+            {
+                scrollViewer.ScrollToEnd();
+            }
+        }
+
         private void BtnSendImage_Click(object sender, RoutedEventArgs e)
         {
             var dlg = new OpenFileDialog
@@ -104,6 +135,20 @@ namespace LynxUI_Main.Custom_Controls
             Debug.WriteLine("[ERROR] Image failed to load: " + e.ErrorException?.Message);
         }
 
+        private static T FindVisualChild<T>(DependencyObject obj) where T : DependencyObject
+        {
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(obj); i++)
+            {
+                var child = VisualTreeHelper.GetChild(obj, i);
+                if (child is T t)
+                    return t;
+
+                var childOfChild = FindVisualChild<T>(child);
+                if (childOfChild != null)
+                    return childOfChild;
+            }
+            return null;
+        }
     }
 }
 

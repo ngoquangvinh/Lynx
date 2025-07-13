@@ -420,7 +420,7 @@ namespace LynxUI_Main.ViewModels
         private void ExecuteAddFriend()
         {
             System.Diagnostics.Debug.WriteLine("[👤] AddFriendCommand clicked.");
-            var window = new AddFriend(CurrentUserId); // Pass the required 'userId' parameter
+            var window = new AddFriend(CurrentUserId);
             window.Owner = Application.Current.MainWindow;
             window.ShowDialog();
         }
@@ -429,6 +429,9 @@ namespace LynxUI_Main.ViewModels
         {
             // TODO: Show Create Group dialog
             System.Diagnostics.Debug.WriteLine("[👥] CreateGroupCommand clicked.");
+            var groupWindow = new CreateGroup(CurrentUserId);
+            groupWindow.Owner = Application.Current.MainWindow;
+            groupWindow.ShowDialog();
         }
 
         public async void ShowChatTab()

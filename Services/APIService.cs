@@ -334,6 +334,22 @@ namespace LynxUI_Main.Services
             return (chatIdToken.Value<int>(), isNewToken.Value<bool>());
         }
 
+        public async Task<object?> CreateGroupChatAsync(List<int> userIds)
+        {
+            var token = TokenStorage.LoadToken();
+            if (string.IsNullOrEmpty(token)) return null;
+
+            _httpClient.DefaultRequestHeaders.Authorization =
+                new AuthenticationHeaderValue("Bearer", token);
+
+            var dto = new { UserIds = userIds };
+            var json = JsonSerializer.Serialize(dto);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.PostAsync($"{BASE_URL}/api/Chat/create_group_chat", content);
+            return response.IsSuccessStatusCode ? await response.Content.ReadAsStringAsync() : null;
+        }
+
         public async Task<string?> UploadFileAsync(string filePath, string type, int userId)
         {
             var token = TokenStorage.LoadToken();
@@ -353,6 +369,26 @@ namespace LynxUI_Main.Services
             var doc = JsonDocument.Parse(json);
             return doc.RootElement.GetProperty("fileUrl").GetString();
         }
+
+        public async Task<string?> UploadAvatarAsync(string filePath, int userId)
+        {
+            if (!File.Exists(filePath))
+                return null;
+
+            using var form = new MultipartFormDataContent();
+            var fileStream = new StreamContent(File.OpenRead(filePath));
+            fileStream.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
+            form.Add(fileStream, "file", Path.GetFileName(filePath));
+
+            var response = await _httpClient.PostAsync($"{BASE_URL}/api/user/upload_avatar?userId={userId}", form);
+            if (!response.IsSuccessStatusCode)
+                return null;
+
+            var json = await response.Content.ReadAsStringAsync();
+            var doc = JsonDocument.Parse(json);
+            return doc.RootElement.GetProperty("avatarUrl").GetString();
+        }
+
 
     }
 }
